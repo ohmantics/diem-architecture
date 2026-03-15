@@ -4,7 +4,7 @@ abbrev: "DIEM Architectural Considerations"
 category: info
 
 docname: draft-rosenberg-diem-architecture-latest
-submissiontype: independent
+submissiontype: IETF
 number:
 date:
 consensus: false
