@@ -1,0 +1,13 @@
+*.html
+*.pdf
+*.txt
+*.xml
+!draft-rosenberg-diem-architecture.md
+lib/
+id_base
+.targets.mk
+.refcache/
+node_modules/
+package-lock.json
+.tags
+.vscode/
