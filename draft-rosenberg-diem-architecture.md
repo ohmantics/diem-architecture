@@ -33,7 +33,8 @@ informative:
 
 --- abstract
 
-TODO Abstract
+This document describes an architectural model for digital emblems as defined by the DIEM working group.
+It is intended to complement the use cases and requirements in {{DIEM-REQS}} by presenting one possible architecture.
 
 --- middle
 
