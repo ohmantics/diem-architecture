@@ -500,7 +500,7 @@ Profiles may still use authenticated access where audit of who looked is itself 
 Confidentiality also covers existence.
 Where the mere existence of an emblem name is sensitive, issuers use unguessable labels and a denial-of-existence method that does not reveal them.
 Plain NSEC allows zone walking and would expose such labels.
-Compact denial of existence {{RFC9824}} reveals nothing but requires online signing; offline-signed zones can use NSEC3 {{RFC9276}}, whose hashed names resist enumeration when the labels themselves have high entropy.
+Compact denial of existence {{RFC9824}} reveals nothing but requires online signing, and its distinct signal for nonexistent names requires signer support that is not yet common in deployed authoritative servers; offline-signed zones can use NSEC3 {{RFC9276}}, whose hashed names resist enumeration when the labels themselves have high entropy.
 NSEC3 still reveals, through its type bitmaps, how many names in the zone hold emblem records, though not which names they are; issuers for whom that count is sensitive should use compact denial or add decoy names.
 
 # Offline and Constrained Validation {#offline}
@@ -509,7 +509,8 @@ NSEC3 still reveals, through its type bitmaps, how many names in the zone hold e
 DNSSEC data is self-authenticating: an RRset, its RRSIG, and the chain of DNSKEY and DS records up to a trust anchor can be validated anywhere, by anyone holding the root trust anchor and a clock.
 
 An offline bundle serializes exactly that, following the pattern of the TLS DNSSEC chain extension {{RFC9102}} and the CHAIN query {{RFC7901}}.
-A full chain from the root is typically a few kilobytes, so a bundle fits in a large QR code, a high-capacity tag, or an accompanying document, and can be validated at a disconnected port or in the field.
+A bundle carrying the full chain from the root runs from one to a few kilobytes, so it fits in a large QR code or an accompanying document, and can be validated at a disconnected port or in the field.
+Smaller carriers, such as common NFC tags of under a kilobyte, generally need a validator that already holds a trust anchor closer to the issuer (for its sector, or for the issuer's own zone), so that the bundle can omit the upper part of the chain.
 Signature algorithm choice matters here: newer algorithms, such as those based on elliptic curves, have much smaller keys and signatures than RSA (see {{RFC8624}} for current guidance), so issuers that expect their emblems to travel in bundles should prefer them.
 Bundle sizes will need revisiting as post-quantum algorithms, whose signatures are generally larger, come into use for DNSSEC.
 Its validity is bounded by the shortest RRSIG validity period it contains, which also bounds how long a removed emblem can be replayed.
@@ -571,13 +572,13 @@ Layout:
 : How its data divides into facets, which facets are static and which dynamic, and the expected TTLs and signing arrangements for each ({{facets}}).
 
 Naming and discovery:
-: How validators learn emblem names for its assets, and whether names are derived from the asset's name, conveyed out of band, or deliberately unguessable ({{discovery}}).
+: How validators learn emblem names for its assets, whether names are derived from the asset's name, conveyed out of band, or deliberately unguessable, and how the `asset` key relates to the emblem name ({{discovery}}).
 
 Hierarchy:
 : Whether its emblems refer to emblems of other issuers or profiles, and whether references carry digests ({{hierarchy}}).
 
 Authorization:
-: Whether endorsement is required, which authorizing entities it recognizes and how validators learn of them, and whether queried or stapled endorsements are acceptable ({{endorsement}}).
+: Whether endorsement is required, which authorizing entities it recognizes and how validators learn of them, how endorsements are named, how an endorsement's scope is judged to cover an emblem, and whether queried or stapled endorsements are acceptable ({{endorsement}}).
 
 Confidentiality:
 : Which values are encrypted, to whom, and how recipients' keys are found ({{confidentiality}}).
@@ -602,15 +603,16 @@ In outline, a validator:
 1. obtains the emblem name (or an offline bundle) for the asset;
 2. retrieves the emblem records it needs, or extracts them from the bundle;
 3. validates them with DNSSEC, treating bogus data as absent and, unless the profile permits unvalidated emblems, treating unsigned data as absent;
-4. checks that the emblem identifies the asset in front of it, by FQDN and by whatever cross-check identifiers the profile defines;
-5. identifies the profile, checks each value against its key's type, and rejects the emblem if it contains a critical key the validator does not understand;
+4. identifies the profile, checks each value against its key's type, and rejects the emblem if it contains a critical key the validator does not understand;
+5. checks that the emblem identifies the asset in front of it, by FQDN and by whatever cross-check identifiers the profile defines;
 6. checks validity periods;
 7. where the profile requires authorization, validates the endorsement (queried or stapled) and checks that its scope covers the emblem;
 8. follows references to other emblems as far as its task requires, checking digests where present;
 9. decrypts any confidential values it is entitled to read; and
 10. interprets the result under the profile, optionally retaining the validated responses as evidence ({{lifecycle}}).
 
-Steps 1 through 9 need no profile-specific code beyond the profile's key and type definitions, which a validator can load as data.
+The steps are common to all profiles, but some of their inputs come from the profile: its keys and types (step 4), how its emblems identify their assets (step 5), and, where it requires authorization, which authorizing entities it recognizes, how their endorsements are named, and how an endorsement's scope is judged to cover an emblem (step 7).
+These are data that a validator can load, listed in the profile template ({{profiles}}), rather than code.
 
 # Meeting the Requirements {#reqs-map}
 
@@ -697,10 +699,11 @@ Issuer and authorization:
 
 Placement:
 : The asset is a network service, so its name is already known to anyone who would interact with it.
-  The hospital may publish at `_diem.records.hospital.example` (delegated to a provider that serves emblems), or use one of the query-indistinguishability techniques of {{undetectable}} at the service's own name, as its profile's threat model dictates.
+  The hospital may publish under its `_diem` cut, at `records._diem.hospital.example` (delegated to a provider that serves emblems, with the profile deriving the emblem name from the service's name), or use one of the query-indistinguishability techniques of {{undetectable}} at the service's own name, as its profile's threat model dictates.
+  Either way, the `asset` key names the service itself, `records.hospital.example`, not the emblem name.
 
 ~~~ cbor-diag
-/ EMBLEM at _diem.records.hospital.example /
+/ EMBLEM at records._diem.hospital.example /
 {
   "profile": "ihl-protective",
   "purpose": ["protective-red-cross"],
@@ -711,7 +714,7 @@ Placement:
                "text": 38(["en", "GC I, Art. 19"])}],
   "valid":   [1(1793491200), 1(1801440000)],
   "issuer-name": 38(["en", "Example General Hospital"]),
-  "mark":    "_mark._diem.records.hospital.example",
+  "mark":    "_mark.records._diem.hospital.example",
   "endorsement": {                / stapled, from the ministry /
     "by":     "health.gov.example",
     "staple": h'...'   / ENDORSE RRset, RRSIGs, chain from root /
@@ -729,7 +732,7 @@ Placement:
   "mark-digest":   h'...'      / the mark the hospital may display /
 }
 
-/ EMBLEM at _mark._diem.records.hospital.example /
+/ EMBLEM at _mark.records._diem.hospital.example /
 / (visual mark facet: an image of the distinctive emblem) /
 {
   "profile":    "mark",
@@ -1046,6 +1049,11 @@ This document has no IANA actions.
 A specification realizing it would request the EMBLEM and ENDORSE RRTypes and create registries for common keys, profile identifiers, and code-list identifiers.
 
 --- back
+
+# Changes from draft-rosenberg-diem-architecture-01
+{:numbered="false" removeinrfc="true"}
+
+* Fixed some known errata and made minor touchups.
 
 # Changes from draft-rosenberg-diem-architecture-00
 {:numbered="false" removeinrfc="true"}
