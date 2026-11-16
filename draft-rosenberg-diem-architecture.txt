@@ -4,8 +4,8 @@
 
 Digital Emblems                                             A. Rosenberg
 Internet-Draft                                                  Veridigo
-Intended status: Informational                           1 November 2026
-Expires: 5 May 2027
+Intended status: Informational                          16 November 2026
+Expires: 20 May 2027
 
 
              Digital Emblems - Architectural Considerations
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 5 May 2027.
+   This Internet-Draft will expire on 20 May 2027.
 
 Copyright Notice
 
@@ -112,6 +112,7 @@ Table of Contents
    19. Privacy Considerations
    20. IANA Considerations
    21. Informative References
+   Changes from draft-rosenberg-diem-architecture-01
    Changes from draft-rosenberg-diem-architecture-00
    Acknowledgments
    Author's Address
@@ -770,13 +771,15 @@ Table of Contents
    an emblem name is sensitive, issuers use unguessable labels and a
    denial-of-existence method that does not reveal them.  Plain NSEC
    allows zone walking and would expose such labels.  Compact denial of
-   existence [RFC9824] reveals nothing but requires online signing;
-   offline-signed zones can use NSEC3 [RFC9276], whose hashed names
-   resist enumeration when the labels themselves have high entropy.
-   NSEC3 still reveals, through its type bitmaps, how many names in the
-   zone hold emblem records, though not which names they are; issuers
-   for whom that count is sensitive should use compact denial or add
-   decoy names.
+   existence [RFC9824] reveals nothing but requires online signing, and
+   its distinct signal for nonexistent names requires signer support
+   that is not yet common in deployed authoritative servers; offline-
+   signed zones can use NSEC3 [RFC9276], whose hashed names resist
+   enumeration when the labels themselves have high entropy.  NSEC3
+   still reveals, through its type bitmaps, how many names in the zone
+   hold emblem records, though not which names they are; issuers for
+   whom that count is sensitive should use compact denial or add decoy
+   names.
 
 10.  Offline and Constrained Validation
 
@@ -788,23 +791,26 @@ Table of Contents
 
    An offline bundle serializes exactly that, following the pattern of
    the TLS DNSSEC chain extension [RFC9102] and the CHAIN query
-   [RFC7901].  A full chain from the root is typically a few kilobytes,
-   so a bundle fits in a large QR code, a high-capacity tag, or an
+   [RFC7901].  A bundle carrying the full chain from the root runs from
+   one to a few kilobytes, so it fits in a large QR code or an
    accompanying document, and can be validated at a disconnected port or
-   in the field.  Signature algorithm choice matters here: newer
-   algorithms, such as those based on elliptic curves, have much smaller
-   keys and signatures than RSA (see [RFC8624] for current guidance), so
-   issuers that expect their emblems to travel in bundles should prefer
-   them.  Bundle sizes will need revisiting as post-quantum algorithms,
-   whose signatures are generally larger, come into use for DNSSEC.  Its
-   validity is bounded by the shortest RRSIG validity period it
-   contains, which also bounds how long a removed emblem can be
-   replayed.  That includes the signatures of the root and TLD zones,
-   which the issuer does not control and which typically last one to
-   three weeks, so bundles have a limited shelf life and must be
-   refreshed for long journeys.  An offline validator also needs a
-   trustworthy clock, since a validator whose clock can be set back will
-   accept expired signatures.
+   in the field.  Smaller carriers, such as common NFC tags of under a
+   kilobyte, generally need a validator that already holds a trust
+   anchor closer to the issuer (for its sector, or for the issuer's own
+   zone), so that the bundle can omit the upper part of the chain.
+   Signature algorithm choice matters here: newer algorithms, such as
+   those based on elliptic curves, have much smaller keys and signatures
+   than RSA (see [RFC8624] for current guidance), so issuers that expect
+   their emblems to travel in bundles should prefer them.  Bundle sizes
+   will need revisiting as post-quantum algorithms, whose signatures are
+   generally larger, come into use for DNSSEC.  Its validity is bounded
+   by the shortest RRSIG validity period it contains, which also bounds
+   how long a removed emblem can be replayed.  That includes the
+   signatures of the root and TLD zones, which the issuer does not
+   control and which typically last one to three weeks, so bundles have
+   a limited shelf life and must be refreshed for long journeys.  An
+   offline validator also needs a trustworthy clock, since a validator
+   whose clock can be set back will accept expired signatures.
 
    Offline bundles take over the role that application-layer signed
    objects (such as signed CBOR) played in earlier thinking, without
@@ -910,16 +916,18 @@ Table of Contents
       for each (Section 6.6).
 
    Naming and discovery:  How validators learn emblem names for its
-      assets, and whether names are derived from the asset's name,
-      conveyed out of band, or deliberately unguessable (Section 5).
+      assets, whether names are derived from the asset's name, conveyed
+      out of band, or deliberately unguessable, and how the asset key
+      relates to the emblem name (Section 5).
 
    Hierarchy:  Whether its emblems refer to emblems of other issuers or
       profiles, and whether references carry digests (Section 7).
 
    Authorization:  Whether endorsement is required, which authorizing
-      entities it recognizes and how validators learn of them, and
-      whether queried or stapled endorsements are acceptable
-      (Section 8).
+      entities it recognizes and how validators learn of them, how
+      endorsements are named, how an endorsement's scope is judged to
+      cover an emblem, and whether queried or stapled endorsements are
+      acceptable (Section 8).
 
    Confidentiality:  Which values are encrypted, to whom, and how
       recipients' keys are found (Section 9).
@@ -956,13 +964,13 @@ Table of Contents
         unless the profile permits unvalidated emblems, treating
         unsigned data as absent;
 
-   4.   checks that the emblem identifies the asset in front of it, by
-        FQDN and by whatever cross-check identifiers the profile
-        defines;
-
-   5.   identifies the profile, checks each value against its key's
+   4.   identifies the profile, checks each value against its key's
         type, and rejects the emblem if it contains a critical key the
         validator does not understand;
+
+   5.   checks that the emblem identifies the asset in front of it, by
+        FQDN and by whatever cross-check identifiers the profile
+        defines;
 
    6.   checks validity periods;
 
@@ -978,8 +986,13 @@ Table of Contents
    10.  interprets the result under the profile, optionally retaining
         the validated responses as evidence (Section 11).
 
-   Steps 1 through 9 need no profile-specific code beyond the profile's
-   key and type definitions, which a validator can load as data.
+   The steps are common to all profiles, but some of their inputs come
+   from the profile: its keys and types (step 4), how its emblems
+   identify their assets (step 5), and, where it requires authorization,
+   which authorizing entities it recognizes, how their endorsements are
+   named, and how an endorsement's scope is judged to cover an emblem
+   (step 7).  These are data that a validator can load, listed in the
+   profile template (Section 13), rather than code.
 
 15.  Meeting the Requirements
 
@@ -1171,12 +1184,15 @@ Table of Contents
 
    Placement:  The asset is a network service, so its name is already
       known to anyone who would interact with it.  The hospital may
-      publish at _diem.records.hospital.example (delegated to a provider
-      that serves emblems), or use one of the query-indistinguishability
-      techniques of Section 12 at the service's own name, as its
-      profile's threat model dictates.
+      publish under its _diem cut, at records._diem.hospital.example
+      (delegated to a provider that serves emblems, with the profile
+      deriving the emblem name from the service's name), or use one of
+      the query-indistinguishability techniques of Section 12 at the
+      service's own name, as its profile's threat model dictates.
+      Either way, the asset key names the service itself,
+      records.hospital.example, not the emblem name.
 
-   / EMBLEM at _diem.records.hospital.example /
+   / EMBLEM at records._diem.hospital.example /
    {
      "profile": "ihl-protective",
      "purpose": ["protective-red-cross"],
@@ -1187,7 +1203,7 @@ Table of Contents
                   "text": 38(["en", "GC I, Art. 19"])}],
      "valid":   [1(1793491200), 1(1801440000)],
      "issuer-name": 38(["en", "Example General Hospital"]),
-     "mark":    "_mark._diem.records.hospital.example",
+     "mark":    "_mark.records._diem.hospital.example",
      "endorsement": {                / stapled, from the ministry /
        "by":     "health.gov.example",
        "staple": h'...'   / ENDORSE RRset, RRSIGs, chain from root /
@@ -1205,7 +1221,7 @@ Table of Contents
      "mark-digest":   h'...'      / the mark the hospital may display /
    }
 
-   / EMBLEM at _mark._diem.records.hospital.example /
+   / EMBLEM at _mark.records._diem.hospital.example /
    / (visual mark facet: an image of the distinctive emblem) /
    {
      "profile":    "mark",
@@ -1840,6 +1856,12 @@ Table of Contents
    [VCDR]     "Vienna Convention on Diplomatic Relations", 1961,
               <https://legal.un.org/ilc/texts/instruments/english/
               conventions/9_1_1961.pdf>.
+
+Changes from draft-rosenberg-diem-architecture-01
+
+   This section is to be removed before publishing as an RFC.
+
+   *  Fixed some known errata and made minor touchups.
 
 Changes from draft-rosenberg-diem-architecture-00
 

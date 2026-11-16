@@ -12,26 +12,26 @@ A single architecture serves many use cases.
 Use cases differ in the shape of their metadata, which is described by profiles, rather than in their transport or trust machinery.
 The document illustrates the architecture with a strawman encoding (an EMBLEM resource record carrying a deterministic CBOR map with registered, typed keys) and with worked examples drawn from International Humanitarian Law, logistics and customs, diplomatic pouches, and peacekeeping. 
     " name="description">
-<meta content="xml2rfc 3.34.1" name="generator">
+<meta content="xml2rfc 3.35.0" name="generator">
 <meta content="digital emblems" name="keyword">
 <meta content="architecture" name="keyword">
 <meta content="DNS" name="keyword">
 <meta content="DNSSEC" name="keyword">
 <meta content="draft-rosenberg-diem-architecture-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.34.1
-    Python 3.14.8
-    ConfigArgParse 1.8.0
+  xml2rfc 3.35.0
+    Python 3.14.10
+    ConfigArgParse 1.9.0
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.13.4
+    platformdirs 4.14.3
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.9.2
+    wcwidth 0.9.4
 -->
 <link href="draft-rosenberg-diem-architecture.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1032,7 +1032,7 @@ svg {
   & :is([stroke="white"], [stroke^="#fff"]) {
     stroke: var(--background-color);
   }
-  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+  & :is([fill="black"], [fill^="#000"], :not([fill], [fill] *)) {
     fill: var(--text-color);
   }
   & :is([fill="white"], [fill^="#fff"]) {
@@ -1051,7 +1051,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Rosenberg</td>
-<td class="center">Expires 5 May 2027</td>
+<td class="center">Expires 20 May 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1064,12 +1064,12 @@ svg {
 <dd class="internet-draft">draft-rosenberg-diem-architecture-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-11-01" class="published">1 November 2026</time>
+<time datetime="2026-11-16" class="published">16 November 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-05-05">5 May 2027</time></dd>
+<dd class="expires"><time datetime="2027-05-20">20 May 2027</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1122,7 +1122,7 @@ The document illustrates the architecture with a strawman encoding (an EMBLEM re
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 5 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 20 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1271,13 +1271,16 @@ The document illustrates the architecture with a strawman encoding (an EMBLEM re
             <p id="section-toc.1-1.21.1"><a href="#section-21" class="auto internal xref">21</a>. <a href="#name-informative-references" class="internal xref">Informative References</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.22">
-            <p id="section-toc.1-1.22.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-changes-from-draft-rosenber" class="internal xref">Changes from draft-rosenberg-diem-architecture-00</a></p>
+            <p id="section-toc.1-1.22.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-changes-from-draft-rosenber" class="internal xref">Changes from draft-rosenberg-diem-architecture-01</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.23">
-            <p id="section-toc.1-1.23.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+            <p id="section-toc.1-1.23.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-changes-from-draft-rosenberg" class="internal xref">Changes from draft-rosenberg-diem-architecture-00</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.24">
-            <p id="section-toc.1-1.24.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+            <p id="section-toc.1-1.24.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.25">
+            <p id="section-toc.1-1.25.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
 </li>
         </ul>
 </nav>
@@ -1846,7 +1849,7 @@ This resolves an open question from the -00 draft (how encrypted subrecords part
 <p id="section-9-6">Confidentiality also covers existence.
 Where the mere existence of an emblem name is sensitive, issuers use unguessable labels and a denial-of-existence method that does not reveal them.
 Plain NSEC allows zone walking and would expose such labels.
-Compact denial of existence <span>[<a href="#RFC9824" class="cite xref">RFC9824</a>]</span> reveals nothing but requires online signing; offline-signed zones can use NSEC3 <span>[<a href="#RFC9276" class="cite xref">RFC9276</a>]</span>, whose hashed names resist enumeration when the labels themselves have high entropy.
+Compact denial of existence <span>[<a href="#RFC9824" class="cite xref">RFC9824</a>]</span> reveals nothing but requires online signing, and its distinct signal for nonexistent names requires signer support that is not yet common in deployed authoritative servers; offline-signed zones can use NSEC3 <span>[<a href="#RFC9276" class="cite xref">RFC9276</a>]</span>, whose hashed names resist enumeration when the labels themselves have high entropy.
 NSEC3 still reveals, through its type bitmaps, how many names in the zone hold emblem records, though not which names they are; issuers for whom that count is sensitive should use compact denial or add decoy names.<a href="#section-9-6" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1858,7 +1861,8 @@ NSEC3 still reveals, through its type bitmaps, how many names in the zone hold e
 <p id="section-10-1"><span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> requires that the architecture not assume Internet access.
 DNSSEC data is self-authenticating: an RRset, its RRSIG, and the chain of DNSKEY and DS records up to a trust anchor can be validated anywhere, by anyone holding the root trust anchor and a clock.<a href="#section-10-1" class="pilcrow">¶</a></p>
 <p id="section-10-2">An offline bundle serializes exactly that, following the pattern of the TLS DNSSEC chain extension <span>[<a href="#RFC9102" class="cite xref">RFC9102</a>]</span> and the CHAIN query <span>[<a href="#RFC7901" class="cite xref">RFC7901</a>]</span>.
-A full chain from the root is typically a few kilobytes, so a bundle fits in a large QR code, a high-capacity tag, or an accompanying document, and can be validated at a disconnected port or in the field.
+A bundle carrying the full chain from the root runs from one to a few kilobytes, so it fits in a large QR code or an accompanying document, and can be validated at a disconnected port or in the field.
+Smaller carriers, such as common NFC tags of under a kilobyte, generally need a validator that already holds a trust anchor closer to the issuer (for its sector, or for the issuer's own zone), so that the bundle can omit the upper part of the chain.
 Signature algorithm choice matters here: newer algorithms, such as those based on elliptic curves, have much smaller keys and signatures than RSA (see <span>[<a href="#RFC8624" class="cite xref">RFC8624</a>]</span> for current guidance), so issuers that expect their emblems to travel in bundles should prefer them.
 Bundle sizes will need revisiting as post-quantum algorithms, whose signatures are generally larger, come into use for DNSSEC.
 Its validity is bounded by the shortest RRSIG validity period it contains, which also bounds how long a removed emblem can be replayed.
@@ -1954,7 +1958,7 @@ A profile specifies:<a href="#section-13-1" class="pilcrow">¶</a></p>
         <dd class="break"></dd>
 <dt id="section-13-2.5">Naming and discovery:</dt>
         <dd style="margin-left: 1.5em" id="section-13-2.6">
-          <p id="section-13-2.6.1">How validators learn emblem names for its assets, and whether names are derived from the asset's name, conveyed out of band, or deliberately unguessable (<a href="#discovery" class="auto internal xref">Section 5</a>).<a href="#section-13-2.6.1" class="pilcrow">¶</a></p>
+          <p id="section-13-2.6.1">How validators learn emblem names for its assets, whether names are derived from the asset's name, conveyed out of band, or deliberately unguessable, and how the <code>asset</code> key relates to the emblem name (<a href="#discovery" class="auto internal xref">Section 5</a>).<a href="#section-13-2.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-13-2.7">Hierarchy:</dt>
@@ -1964,7 +1968,7 @@ A profile specifies:<a href="#section-13-1" class="pilcrow">¶</a></p>
         <dd class="break"></dd>
 <dt id="section-13-2.9">Authorization:</dt>
         <dd style="margin-left: 1.5em" id="section-13-2.10">
-          <p id="section-13-2.10.1">Whether endorsement is required, which authorizing entities it recognizes and how validators learn of them, and whether queried or stapled endorsements are acceptable (<a href="#endorsement" class="auto internal xref">Section 8</a>).<a href="#section-13-2.10.1" class="pilcrow">¶</a></p>
+          <p id="section-13-2.10.1">Whether endorsement is required, which authorizing entities it recognizes and how validators learn of them, how endorsements are named, how an endorsement's scope is judged to cover an emblem, and whether queried or stapled endorsements are acceptable (<a href="#endorsement" class="auto internal xref">Section 8</a>).<a href="#section-13-2.10.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-13-2.11">Confidentiality:</dt>
@@ -2010,10 +2014,10 @@ In outline, a validator:<a href="#section-14-1" class="pilcrow">¶</a></p>
           <p id="section-14-2.3.1">validates them with DNSSEC, treating bogus data as absent and, unless the profile permits unvalidated emblems, treating unsigned data as absent;<a href="#section-14-2.3.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-14-2.4">
-          <p id="section-14-2.4.1">checks that the emblem identifies the asset in front of it, by FQDN and by whatever cross-check identifiers the profile defines;<a href="#section-14-2.4.1" class="pilcrow">¶</a></p>
+          <p id="section-14-2.4.1">identifies the profile, checks each value against its key's type, and rejects the emblem if it contains a critical key the validator does not understand;<a href="#section-14-2.4.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-14-2.5">
-          <p id="section-14-2.5.1">identifies the profile, checks each value against its key's type, and rejects the emblem if it contains a critical key the validator does not understand;<a href="#section-14-2.5.1" class="pilcrow">¶</a></p>
+          <p id="section-14-2.5.1">checks that the emblem identifies the asset in front of it, by FQDN and by whatever cross-check identifiers the profile defines;<a href="#section-14-2.5.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-14-2.6">
           <p id="section-14-2.6.1">checks validity periods;<a href="#section-14-2.6.1" class="pilcrow">¶</a></p>
@@ -2031,7 +2035,8 @@ In outline, a validator:<a href="#section-14-1" class="pilcrow">¶</a></p>
           <p id="section-14-2.10.1">interprets the result under the profile, optionally retaining the validated responses as evidence (<a href="#lifecycle" class="auto internal xref">Section 11</a>).<a href="#section-14-2.10.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
-<p id="section-14-3">Steps 1 through 9 need no profile-specific code beyond the profile's key and type definitions, which a validator can load as data.<a href="#section-14-3" class="pilcrow">¶</a></p>
+<p id="section-14-3">The steps are common to all profiles, but some of their inputs come from the profile: its keys and types (step 4), how its emblems identify their assets (step 5), and, where it requires authorization, which authorizing entities it recognizes, how their endorsements are named, and how an endorsement's scope is judged to cover an emblem (step 7).
+These are data that a validator can load, listed in the profile template (<a href="#profiles" class="auto internal xref">Section 13</a>), rather than code.<a href="#section-14-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="reqs-map">
@@ -2203,13 +2208,14 @@ Because validators must not reveal their interest, the hospital staples the endo
 <dt id="section-17.1-2.3">Placement:</dt>
           <dd style="margin-left: 1.5em" id="section-17.1-2.4">
             <p id="section-17.1-2.4.1">The asset is a network service, so its name is already known to anyone who would interact with it.
-The hospital may publish at <code>_diem.records.hospital.example</code> (delegated to a provider that serves emblems), or use one of the query-indistinguishability techniques of <a href="#undetectable" class="auto internal xref">Section 12</a> at the service's own name, as its profile's threat model dictates.<a href="#section-17.1-2.4.1" class="pilcrow">¶</a></p>
+The hospital may publish under its <code>_diem</code> cut, at <code>records._diem.hospital.example</code> (delegated to a provider that serves emblems, with the profile deriving the emblem name from the service's name), or use one of the query-indistinguishability techniques of <a href="#undetectable" class="auto internal xref">Section 12</a> at the service's own name, as its profile's threat model dictates.
+Either way, the <code>asset</code> key names the service itself, <code>records.hospital.example</code>, not the emblem name.<a href="#section-17.1-2.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
 <div class="lang-cbor-diag sourcecode" id="section-17.1-3">
 <pre>
-/ EMBLEM at _diem.records.hospital.example /
+/ EMBLEM at records._diem.hospital.example /
 {
   "profile": "ihl-protective",
   "purpose": ["protective-red-cross"],
@@ -2220,7 +2226,7 @@ The hospital may publish at <code>_diem.records.hospital.example</code> (delegat
                "text": 38(["en", "GC I, Art. 19"])}],
   "valid":   [1(1793491200), 1(1801440000)],
   "issuer-name": 38(["en", "Example General Hospital"]),
-  "mark":    "_mark._diem.records.hospital.example",
+  "mark":    "_mark.records._diem.hospital.example",
   "endorsement": {                / stapled, from the ministry /
     "by":     "health.gov.example",
     "staple": h'...'   / ENDORSE RRset, RRSIGs, chain from root /
@@ -2238,7 +2244,7 @@ The hospital may publish at <code>_diem.records.hospital.example</code> (delegat
   "mark-digest":   h'...'      / the mark the hospital may display /
 }
 
-/ EMBLEM at _mark._diem.records.hospital.example /
+/ EMBLEM at _mark.records._diem.hospital.example /
 / (visual mark facet: an image of the distinctive emblem) /
 {
   "profile":    "mark",
@@ -2816,59 +2822,72 @@ A specification realizing it would request the EMBLEM and ENDORSE RRTypes and cr
 </dl>
 </section>
 </div>
-<div id="changes-from-draft-rosenberg-diem-architecture-00">
+<div id="changes-from-draft-rosenberg-diem-architecture-01">
 <section id="appendix-A">
       <h2 id="name-changes-from-draft-rosenber">
-<a href="#name-changes-from-draft-rosenber" class="section-name selfRef">Changes from draft-rosenberg-diem-architecture-00</a>
+<a href="#name-changes-from-draft-rosenber" class="section-name selfRef">Changes from draft-rosenberg-diem-architecture-01</a>
       </h2>
 <p id="appendix-A-1">This section is to be removed before publishing as an RFC.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-A-2.1">
-          <p id="appendix-A-2.1.1">Adopted DNSSEC as the integrity layer, replacing application-layer hashing of emblem records.<a href="#appendix-A-2.1.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-2.1.1">Fixed some known errata and made minor touchups.<a href="#appendix-A-2.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-A-2.2">
-          <p id="appendix-A-2.2.1">Replaced "signed" and "informational" fields with static and dynamic facets in separate RRsets.<a href="#appendix-A-2.2.1" class="pilcrow">¶</a></p>
+      </ul>
+</section>
+</div>
+<div id="changes-from-draft-rosenberg-diem-architecture-00">
+<section id="appendix-B">
+      <h2 id="name-changes-from-draft-rosenberg">
+<a href="#name-changes-from-draft-rosenberg" class="section-name selfRef">Changes from draft-rosenberg-diem-architecture-00</a>
+      </h2>
+<p id="appendix-B-1">This section is to be removed before publishing as an RFC.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-B-2.1">
+          <p id="appendix-B-2.1.1">Adopted DNSSEC as the integrity layer, replacing application-layer hashing of emblem records.<a href="#appendix-B-2.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-A-2.3">
-          <p id="appendix-A-2.3.1">Replaced the Merkle-tree hierarchy with DNS naming plus cross-zone references with optional digests.<a href="#appendix-A-2.3.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-B-2.2">
+          <p id="appendix-B-2.2.1">Replaced "signed" and "informational" fields with static and dynamic facets in separate RRsets.<a href="#appendix-B-2.2.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-A-2.4">
-          <p id="appendix-A-2.4.1">Added typed keys and external code lists as value types.<a href="#appendix-A-2.4.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-B-2.3">
+          <p id="appendix-B-2.3.1">Replaced the Merkle-tree hierarchy with DNS naming plus cross-zone references with optional digests.<a href="#appendix-B-2.3.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-A-2.5">
-          <p id="appendix-A-2.5.1">Added treatment (requested actions with an open legal basis) as a common key.<a href="#appendix-A-2.5.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-B-2.4">
+          <p id="appendix-B-2.4.1">Added typed keys and external code lists as value types.<a href="#appendix-B-2.4.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-A-2.6">
-          <p id="appendix-A-2.6.1">Added visual marks, displayed only when endorsed or canonical.<a href="#appendix-A-2.6.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-B-2.5">
+          <p id="appendix-B-2.5.1">Added treatment (requested actions with an open legal basis) as a common key.<a href="#appendix-B-2.5.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-A-2.7">
-          <p id="appendix-A-2.7.1">Added endorsement (as RRsets in the authorizing entity's zone, queried or stapled), confidentiality, offline bundles, lifecycle, and undetectable validation sections.<a href="#appendix-A-2.7.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-B-2.6">
+          <p id="appendix-B-2.6.1">Added visual marks, displayed only when endorsed or canonical.<a href="#appendix-B-2.6.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-A-2.8">
-          <p id="appendix-A-2.8.1">Added what a profile specifies, and an outline of validation common to all profiles.<a href="#appendix-A-2.8.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-B-2.7">
+          <p id="appendix-B-2.7.1">Added endorsement (as RRsets in the authorizing entity's zone, queried or stapled), confidentiality, offline bundles, lifecycle, and undetectable validation sections.<a href="#appendix-B-2.7.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-A-2.9">
-          <p id="appendix-A-2.9.1">Added Privacy Considerations.<a href="#appendix-A-2.9.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-B-2.8">
+          <p id="appendix-B-2.8.1">Added what a profile specifies, and an outline of validation common to all profiles.<a href="#appendix-B-2.8.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-A-2.10">
-          <p id="appendix-A-2.10.1">Added a strawman EMBLEM encoding using deterministic CBOR.<a href="#appendix-A-2.10.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-B-2.9">
+          <p id="appendix-B-2.9.1">Added Privacy Considerations.<a href="#appendix-B-2.9.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-A-2.11">
-          <p id="appendix-A-2.11.1">Added worked examples for IHL, logistics and customs, diplomatic pouches, and peacekeeping.<a href="#appendix-A-2.11.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-B-2.10">
+          <p id="appendix-B-2.10.1">Added a strawman EMBLEM encoding using deterministic CBOR.<a href="#appendix-B-2.10.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-B-2.11">
+          <p id="appendix-B-2.11.1">Added worked examples for IHL, logistics and customs, diplomatic pouches, and peacekeeping.<a href="#appendix-B-2.11.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
 </div>
 <div id="acknowledgments">
-<section id="appendix-B">
+<section id="appendix-C">
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-B-1">The author thanks the participants of the DIEM working group for their drafts and comments.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-C-1">The author thanks the participants of the DIEM working group for their drafts and comments.<a href="#appendix-C-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
-<section id="appendix-C">
+<section id="appendix-D">
       <h2 id="name-authors-address">
 <a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
       </h2>
