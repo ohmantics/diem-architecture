@@ -48,6 +48,7 @@ informative:
   RFC4035:
   RFC4501:
   RFC4592:
+  RFC5890:
   RFC5646:
   RFC6698:
   RFC6895:
@@ -67,6 +68,7 @@ informative:
   RFC9250:
   RFC9364:
   RFC9460:
+  RFC9499:
   RFC9824:
   RFC9276:
   RFC7871:
@@ -116,7 +118,7 @@ informative:
 This document describes an architecture for digital emblems in which emblems are authenticated, typed metadata about assets, published in the DNS and protected by DNSSEC.
 A single architecture serves many use cases.
 Use cases differ in the shape of their metadata, which is described by profiles, rather than in their transport or trust machinery.
-The document illustrates the architecture with a strawman encoding (an EMBLEM resource record carrying a deterministic CBOR map with registered, typed keys) and with worked examples drawn from International Humanitarian Law, logistics and customs, diplomatic pouches, and peacekeeping.
+The document illustrates the architecture with a strawman encoding (an EMBLEM resource record carrying a deterministic CBOR map with registered, typed map keys) and with worked examples drawn from International Humanitarian Law, logistics and customs, diplomatic pouches, and peacekeeping.
 
 --- middle
 
@@ -160,11 +162,21 @@ Emblem record:
 Facet:
 : A subset of an emblem's data that is retrieved, cached, or signed independently of the rest, and is therefore published as its own RRset (a separate RRType, or a separate owner name).
 
-Key:
+Subject:
+: The asset that an emblem describes, named by the emblem's `asset` map key ({{subject}}).
+
+Map key:
 : A registered identifier for one property in an emblem's dictionary, with a defined value type.
+  This document says "map key" for these, and reserves "key" alone for cryptographic keys.
 
 Code list:
-: An externally maintained controlled vocabulary (for example, ISO 3166-1 country codes {{ISO3166}} or UNECE Recommendation 20 unit codes) used as the type of a key's value.
+: An externally maintained controlled vocabulary (for example, ISO 3166-1 country codes {{ISO3166}} or UNECE Recommendation 20 unit codes) used as the type of a map key's value.
+
+Issuer authorization:
+: A third party's assurance that an emblem issuer is entitled to issue emblems of a given profile or scope; in this architecture, an endorsement ({{endorsement}}).
+
+Validator authorization:
+: Permission for a validator to read restricted emblem data; in this architecture, possession of a key to which the data is encrypted ({{confidentiality}}).
 
 Endorsement:
 : A statement by an authorizing entity that an emblem issuer is authorized to issue emblems of a given profile or scope, published as an RRset in the authorizing entity's own zone.
@@ -189,9 +201,9 @@ Use the DNS for what it already does:
   Application-layer cryptography is reserved for what DNSSEC does not provide: confidentiality, cross-zone endorsement, and offline transfer.
 
 Typed data:
-: Every key has a registered type, and every value can be checked against it.
+: Every map key has a registered type, and every value can be checked against it.
   A validator must be able to tell malformed data from well-formed data, and to tell one property from another without reading free text.
-  Externally maintained code lists are value types bound to keys, not free-standing records.
+  Externally maintained code lists are value types bound to map keys, not free-standing records.
 
 Query granularity equals record granularity:
 : Data that a validator needs to retrieve independently, or that changes on a different schedule, belongs in its own RRset.
@@ -199,7 +211,7 @@ Query granularity equals record granularity:
   The DNS offers projection (by owner name and type) but no predicates, so the record layout is the query model.
 
 Encryption, not audience-dependent answers:
-: Restricted fields are encrypted inside signed records, so that every validator receives the same cacheable, signed answer and only authorized validators can read the restricted parts.
+: Restricted fields are encrypted inside signed records, so that every validator receives the same cacheable, signed answer and only validators holding the right keys can read the restricted parts.
   Serving different answers to authenticated clients is possible as a deployment option but is not the architectural primitive (see {{confidentiality}}).
 
 Neutral about normative frameworks:
@@ -219,7 +231,8 @@ It does not need to be online during validation.
 ~~~
   authorizing entity       emblem issuer          validator
   (state, treaty body,     (hospital, maker,      (armed forces,
-   NPPO, ministry ...)      shipper, MFA ...)      customs, recycler)
+   NPPO, ministry ...)      shipper, foreign       customs, recycler)
+                            ministry ...)
          |                        |                      |
          | endorsement            | emblem records       |
          | (own zone; queried     | (DNSSEC-signed,      |
@@ -234,7 +247,7 @@ It does not need to be online during validation.
 
 Trust in an emblem's content derives from the DNSSEC chain of trust to the zone that publishes it.
 A validated EMBLEM RRset establishes that the holder of the zone's signing keys published that data, and nothing more.
-Whether that zone holder is entitled to make the statement is a separate question, answered by endorsements where a profile requires them and otherwise by the validator's own knowledge (a customs officer knows which shippers they deal with).
+Whether that zone holder is entitled to make the statement is a separate question (issuer authorization), answered by endorsements where a profile requires them and otherwise by the validator's own knowledge (a customs officer knows which shippers they deal with).
 
 This model has a single technical root (the DNS root zone), but it does not create a central authority over emblems.
 No party needs another's permission to publish emblems in its own zone, and authorizing entities operate independently of one another.
@@ -253,9 +266,19 @@ Three consequences deserve emphasis:
 
 # Naming and Discovery {#discovery}
 
+## The Subject of an Emblem {#subject}
+
+The subject of an emblem is the asset it describes, which the emblem names in its `asset` map key.
+An asset may be a person, a place, or a thing, and may be physical, digital, or a combination of the two; the architecture treats them all alike.
+The emblem name is a handle for finding the emblem, not its subject: it may be the asset's own name, a name derived from it, or an unguessable label conveyed on or with the asset.
+Cross-check identifiers in the emblem (a seal number, a serial number, a container number) identify the same subject by other means.
+For a diplomatic pouch, for example, the subject is the pouch, and its seal number is a cross-check identifier; for a hospital's records service, the subject is the service, not the host that runs it or the data it holds.
+How firmly a physical carrier (a label, a tag, a badge) is bound to its subject is a separate question, listed as an open issue ({{open-issues}}).
+
 ## Identifying the Asset
 
 Assets are identified by domain names.
+Names are compared in DNS A-label form {{RFC5890}}, lowercase and without a trailing dot, so internationalized names are carried as A-labels ({{strawman}}).
 How a validator learns an asset's name depends on the asset:
 
 * For digital services, the asset's own name is usually already known (the validator is about to connect to it).
@@ -270,7 +293,7 @@ The architecture does not constrain emblem names.
 An issuer may publish emblems at an asset's own name or at any name in a zone it controls, and validators use whatever emblem name they are given; they do not construct names from a fixed pattern.
 Where a profile derives an emblem name from an asset's name (for example, for network services whose names validators already know), that profile defines the derivation.
 
-As an operational recommendation, issuers should consider placing emblem names under a dedicated label, `_diem` in this document's examples, because it permits a zone cut:
+As an operational recommendation, issuers should consider placing emblem names under a dedicated label, `_diem` in this document's examples, because it permits delegating them (a zone cut, in the terms of {{RFC9499}}):
 
 ~~~
 example.org.                  NS   ordinary-dns.example.net.
@@ -278,16 +301,17 @@ _diem.example.org.            NS   ns1.diem-provider.example.
                               DS   ...
 ~~~
 
-With a cut at `_diem`, the issuer's ordinary DNS service needs no knowledge of DIEM.
+With `_diem` delegated, the issuer's ordinary DNS service needs no knowledge of DIEM.
 Emblem names are served by an authoritative server specialized for emblems, which may be backed by an asset-management or inventory system rather than a zone file, and which may have different security and signing arrangements.
 Resolvers need no DIEM awareness at all; they cache and validate emblem records like any other RRType.
+The delegation is purely operational: answers from the delegated zone are ordinary DNS answers, identical for every client and cacheable by any resolver.
 
-The cut also addresses a practical obstacle.
+The delegation also addresses a practical obstacle.
 Many hosted DNS services and provisioning interfaces accept only a fixed list of RRTypes, and some network equipment mishandles types it does not recognize, even though {{RFC3597}} requires transparent handling.
 An issuer whose existing provider cannot serve new RRTypes need not change providers for the rest of its zone; it delegates only the emblem names.
 
-Below the cut, the issuer arranges names however suits its inventory.
-Hierarchical names express hierarchical assets ({{hierarchy}}), and wildcards {{RFC4592}} can cover classes of assets that share all of their data.
+Below the delegation, the issuer arranges names however suits its inventory.
+Names may mirror the structure of what they describe, but validators follow explicit references between emblems ({{hierarchy}}) rather than deriving one name from another, and wildcards {{RFC4592}} can cover classes of assets that share all of their data.
 Wildcards have limits: they do not match names that exist (including empty non-terminals), and because every name under a wildcard appears to carry an emblem, they must not be used where the existence of an emblem for a particular item (such as a serial number) is itself meant to be evidence.
 
 ## Retrieval
@@ -301,22 +325,30 @@ Large responses use TCP or encrypted transports (DoT {{RFC7858}}, DoH {{RFC8484}
 
 # Data Model {#data-model}
 
-An emblem is a dictionary: a set of key/value pairs, in which values may themselves be arrays or dictionaries.
-Every emblem identifies the profile that defines its keys.
+An emblem is a dictionary: a set of map keys and their values, in which values may themselves be arrays or dictionaries.
+Every emblem identifies the profile that defines its map keys.
 
-## Keys and Types
+## Map Keys and Types
 
-Keys are drawn from registries.
-A small set of common keys applies to all profiles (profile identifier, the FQDN of the marked asset, cross-check asset identifiers, validity period, issuer display name, and the treatment requested of validators, {{treatment}}).
-The charter requires that emblems explicitly identify the marked asset by FQDN {{CHARTER}}, so the asset key is required even when the emblem is published at the asset's own name.
-Each profile defines additional keys.
-Every key definition specifies the value's type, preferably in CDDL {{RFC8610}}.
-A plausible arrangement is one registry of common keys, a key space scoped to each registered profile (so that profiles allocate keys without coordinating with one another), and a private-use range for experimentation; profiles that share a concept (an ISO 3166 country of origin, say) should reuse a common key rather than define their own.
+Map keys are drawn from registries.
+A small set of common map keys applies to all profiles (profile identifier, the FQDN of the marked asset, cross-check asset identifiers, validity period, issuer display name, and the treatment requested of validators, {{treatment}}).
+The charter requires that emblems explicitly identify the marked asset by FQDN {{CHARTER}}, so the `asset` map key is required even when the emblem is published at the asset's own name.
+Each profile defines additional map keys.
+Every map key definition specifies the value's type, preferably in CDDL {{RFC8610}}.
+A plausible arrangement is one registry of common map keys, a map key space scoped to each registered profile (so that profiles allocate map keys without coordinating with one another), and a private-use range for experimentation; profiles that share a concept (an ISO 3166 country of origin, say) should reuse a common map key rather than define their own.
+Map keys outside the registries are text strings named under a domain the issuer controls, so that issuers can define keys of their own (for internal forensic data, say) without coordination or collision.
 
-A validator checks each value against its key's type.
+A validator checks each value against its map key's type.
 A value that does not match its type is an error, not a curiosity to be displayed.
-Unknown keys may be ignored, unless the emblem marks them as critical (in the manner of the COSE "crit" header parameter {{RFC9052}}), in which case a validator that does not understand them must not rely on the emblem.
+Validators skip map keys they do not understand, unless the emblem marks them as critical (in the manner of the COSE "crit" header parameter {{RFC9052}}), in which case a validator that does not understand them must not rely on the emblem.
 This lets profiles evolve without breaking old validators, while still allowing an issuer to say "do not act on this emblem unless you understand all of it".
+
+## Several Profiles for One Asset {#multi-profile}
+
+An asset may fall under several profiles: a shipment of batteries is both a consignment and dangerous goods, and a medical facility may carry both a protective emblem and a facility registration.
+Its EMBLEM RRset then holds one record per profile, each naming its own profile.
+A validator uses the records whose profiles it understands and skips the rest, just as it skips unknown map keys, so a dangerous goods inspector need not interpret a customs profile to find the hazard data.
+One query retrieves all of them, and each profile's data stays separately typed and separately interpreted.
 
 ## Value Types
 
@@ -325,28 +357,35 @@ The following value types cover the use cases identified so far:
 | Type | Purpose |
 |---|---|
 | integer, boolean, byte string | as usual |
-| decimal | exact decimal fixed-point (base-10 exponent and mantissa), never binary floating point |
+| decimal | exact decimal fixed-point (base-10 exponent and mantissa) |
+| floating point | binary floating point, only where the map key's definition permits it |
 | quantity | decimal plus a unit code from UNECE Recommendation 20 {{UNECE20}}, or an integer count plus a package type code from UNECE Recommendation 21 |
 | monetary amount | decimal plus a currency code from ISO 4217 {{ISO4217}} |
 | timestamp, duration | 64-bit seconds since the epoch; durations in seconds or calendar units |
 | text | UTF-8 with a language tag {{RFC5646}} where it is meant for humans |
 | enumeration | a value from a list defined by DIEM or by the profile (in an encoding, a small integer) |
-| code | a code from an external code list fixed by the key's definition, carried verbatim |
+| external code | a code from an external code list fixed by the map key's definition, carried verbatim in the list's canonical form and compared by that list's rules (case-sensitive unless the list says otherwise) |
 | citation | a reference to a legal or other normative instrument, in an identified citation scheme, with optional text |
 | location | a point (as in LOC {{RFC1876}}) or an area (representation to be determined) |
 | URI, domain name | references to other resources and other emblems |
 | media | an embedded image, such as a visual mark ({{marks}}) |
-| encrypted | ciphertext of any of the above, readable by authorized validators ({{confidentiality}}) |
+| encrypted | ciphertext of any of the above, readable by the validators it is encrypted to ({{confidentiality}}) |
 | dictionary, array | nesting |
 {: title="Value types"}
 
-Two distinctions from {{I-D.woodcock-faltstrom-external-registry-rrtypes}} are worth adopting: a value that is *not applicable* (the key is absent) differs from a value that *exists but is unknown to the issuer* (the key is present with an explicit "unknown" marker), and an issuer's signed assertion of ignorance is itself meaningful.
+Each map key's definition says whether a numeric value is an exact decimal or a floating-point number.
+Binary floating point cannot represent most decimal fractions exactly, so implementations can round the same value differently.
+That is unacceptable for some values (monetary amounts above all, and declared quantities that two parties must agree on) and harmless for others (many physical measurements).
+A protocol specification would need to guide profile authors to consider exactness, rounding, and special values (not-a-number, infinities, negative zero) carefully when choosing.
+
+Two distinctions from {{I-D.woodcock-faltstrom-external-registry-rrtypes}} are worth adopting: a value that is *not applicable* (the map key is absent) differs from a value that *exists but is unknown to the issuer* (the map key is present with an explicit "unknown" marker), and an issuer's signed assertion of ignorance is itself meaningful.
 
 ## Treatment {#treatment}
 
 Emblems often exist to ask something of whoever encounters the asset: that it not be attacked, opened, detained, or read.
 Such requests are expressed as *treatments*, each a modality (prohibit, request, or require) applied to an action from a small enumeration (attack, open, detain, inspect, read, report, and so on).
 Because actions are enumerated, software can ask "does anything here prohibit inspection?" across emblems of different profiles without understanding the law behind each.
+Modalities and actions come from one common DIEM registry shared by all profiles; each profile states which treatments it may request ({{profiles}}).
 
 A treatment says what is asked, not why.
 Its legal basis is carried separately, as one or more citations in an identified scheme (for example, a European Legislation Identifier, an Akoma Ntoso identifier, or a URI), with optional language-tagged text, and optionally a jurisdiction (an ISO 3166 code or an indication of international law).
@@ -355,7 +394,7 @@ A profile may still list the bases it expects, where that set is small (as for t
 
 A treatment is a request backed, if at all, by the cited framework.
 The emblem does not enforce it, and does not confer the protection or privilege it signals: under IHL, for example, the distinctive emblem indicates protection that exists by law, whether or not the emblem is displayed.
-Where a profile requires authorization, the endorsement's scope covers the purposes and treatments the issuer may claim.
+Where a profile requires issuer authorization, the endorsement's scope covers the purposes and treatments the issuer may claim.
 
 ## Visual Marks {#marks}
 
@@ -385,26 +424,26 @@ In the external-registry RRTypes, a record names a code list (for example, "ISO 
 The property that the code describes (whether "QA" is a flag state, a place of incorporation, or a country of origin) is carried only in the descriptor, which receivers must not interpret.
 Two records about the same asset that use the same code list are therefore indistinguishable to software.
 
-In this architecture, the code list is the *type* of a key:
+In this architecture, the code list is the *type* of a map key:
 
 ~~~ cbor-diag
 / external-registry pattern (illustrative): meaning only in text /
 ISO 3166-1 - QA "flag state"
 ISO 3166-1 - US "state of incorporation"
 
-/ typed keys: the key carries the meaning, the code list the type /
+/ typed map keys: the map key carries the meaning, the code list the type /
 { "flag-state": "QA", "incorporated-in": "US" }
 ~~~
 {: title="Where the meaning lives"}
 
-A key definition says "the value is an ISO 3166-1 alpha-2 code", so a validator can reject "Q4" or "qa" (the codes are compared verbatim, as in the external-registry draft), and software can act on "flag-state" directly.
+A map key definition says "the value is an ISO 3166-1 alpha-2 code", so a validator can reject "Q4" or "qa" (the codes are compared verbatim, as in the external-registry draft), and software can act on "flag-state" directly.
 The alternative, recovering the property by parsing descriptor strings such as "flag state", is error-prone: descriptors are unconstrained text, so the same property can be written in many ways, in any language, abbreviated, or misspelled, and different parser implementors may interpret the strings differently.
-Where a key admits values from more than one code list, the value carries a small code-list identifier alongside the code.
+Where a map key admits values from more than one code list, the value carries a small code-list identifier alongside the code.
 The registry of code-list identifiers references external lists without copying their contents.
 
 This approach also reaches code lists that do not fit a one-RRType-per-maintainer pattern.
 The OPCW use case in {{DIEM-REQS}} needs Chemical Abstracts Service registry numbers, IUPAC names, GHS hazard pictograms, and UN dangerous goods numbers {{UNMODELREGS}}; the logistics example below needs Harmonized System codes {{HS}} and ISPM 15 treatment codes {{ISPM15}}.
-Each of these becomes a value type that keys can use, with no new RRType per maintainer.
+Each of these becomes a value type that map keys can use, with no new RRType per maintainer.
 
 ## Facets: Signed Once, Signed Often {#facets}
 
@@ -422,21 +461,32 @@ Facets are also the unit of retrieval.
 A recycler that only needs the battery chemistry does not need to fetch the declared customs value, and a customs officer does not need recycling instructions.
 Each facet is either a distinct RRType at the emblem name (a LOC record for position, a URI record {{RFC7553}} for a link to documentation) or a distinct owner name below it.
 
+Just as a profile says which facets are static and which dynamic, it says which facets a validator needs for which purpose ({{profiles}}).
+Optional facets add information but never change the outcome of validation.
+A validator that cannot obtain a required facet (because the query times out, the facet is not in an offline bundle, or it is encrypted to someone else) reaches an indeterminate result for that purpose, not an invalid one ({{validation}}).
+The distinction matters: a protected site must not appear unprotected because a query timed out.
+
 This replaces the application-layer hashing of the -00 draft.
 DNSSEC already signs each RRset; a validator that retrieves a facet gets integrity for exactly that facet.
 
 # Hierarchy and Composition {#hierarchy}
 
+Assets nest and compose.
 Physical assets nest: devices in cartons, cartons on pallets, pallets in containers, containers on ships.
+Digital assets compose: an organization operates services, a service runs on hosts, a dataset is held on storage.
+The two mix: a hard drive is a physical object (and may be dangerous goods in transit) that carries a dataset with protections of its own.
 Different parties attest to different levels.
-The architecture expresses this in two ways:
+The architecture expresses all of these by explicit reference: an emblem names the emblems it relates to, and each referenced emblem is validated through its own zone's DNSSEC chain.
 
-* Within one issuer's zone, by DNS hierarchy.
-  An emblem name for a product class can have child names for individual items, so that class-wide data (model, hazard classification) is published once and item-specific data (serial number) is published per item.
-* Across issuers, by reference.
-  A shipper's consignment emblem refers to the manufacturer's emblems by domain name.
-  Each referenced emblem is validated through its own zone's DNSSEC chain.
-  Where the referencing party wants to fix exactly what it saw at the time (for example, a declaration to customs), the reference also carries a digest of the referenced RRset.
+* Within one issuer, a reference can be written relative to the issuer's emblem zone (for example, its `_diem` zone).
+  Relative references keep records small, and they cannot lead outside the issuer's zone.
+  A product class, for instance, is published once, with class-wide data (model, hazard classification), and each item's emblem refers to its class and adds only item-specific data (serial number).
+* Across issuers, references are absolute names.
+  A shipper's consignment emblem refers to the manufacturer's class emblems; a hard drive's emblem, describing the physical object, refers to the emblem of the dataset it holds, which carries the data's own protections.
+
+Where the referencing party wants to fix exactly what it saw at the time (for example, a declaration to customs), the reference also carries a digest of the referenced RRset.
+A profile states whether references carry digests, and whether they are required.
+A digest pins the referenced data, so correcting that data means publishing a new version rather than editing it in place; a reference without a digest always resolves to the current data, which DNSSEC still authenticates.
 
 A validator walks as far as its task requires.
 A customs officer may validate only the shipper's consignment emblem; a recycler may validate a single device's battery facet back to the manufacturer; an audit may walk everything.
@@ -444,7 +494,7 @@ Full walks of large consignments involve many queries, which caching, wildcards 
 
 # Authorization and Endorsement {#endorsement}
 
-Some profiles require that an issuer be authorized by a third party: a state authorizing use of a protective emblem under IHL, a national plant protection organization authorizing a pallet producer to apply the ISPM 15 mark, a treaty secretariat recognizing a designated site.
+Some profiles require issuer authorization by a third party: a state authorizing use of a protective emblem under IHL, a national plant protection organization authorizing a pallet producer to apply the ISPM 15 mark, a treaty secretariat recognizing a designated site.
 DNSSEC proves who published an emblem, not who authorized it.
 Endorsement fills that gap.
 
@@ -479,6 +529,10 @@ An authorizing entity that also wants its endorsements to be publicly auditable 
 A profile states whether it requires endorsement, which authorizing entities it recognizes and how validators learn of them, and whether queried endorsements, stapled endorsements, or both are acceptable.
 Because each authorizing entity's trust is anchored in a zone it controls, no global registry of authorities is needed.
 
+An issuer may hold endorsements from several authorizing entities, and an emblem may carry or refer to several.
+Unless its profile is stricter, a validator accepts any one endorsement from an authorizing entity it recognizes whose scope covers the emblem, and ignores the others.
+The authorizing entities need not recognize one another: where two states each regard themselves as competent for the same medical facility, each can endorse it, and a validator acting under either state's authority finds the endorsement it recognizes.
+
 # Confidentiality and Selective Disclosure {#confidentiality}
 
 Some emblem data is restricted: a consignment's declared value, the identity of a diplomatic courier, an issuer's internal forensic data.
@@ -489,11 +543,18 @@ An encrypted value is a COSE {{RFC9052}} encryption structure (COSE_Encrypt0 for
 DNSSEC signs the ciphertext, so integrity covers restricted fields even for validators that cannot read them.
 This resolves an open question from the -00 draft (how encrypted subrecords participate in integrity protection): the signature covers what is published, which is the ciphertext.
 
-The alternative of authenticated DNS views, in which the server authenticates the client and returns different data to different audiences, is not recommended as the general mechanism:
+This is how the architecture provides validator authorization: a validator that holds a recipient's private key can read the value, and no other can, whichever server or cache it obtained the record from.
+Recipients are therefore parties whose roles a profile names in advance (origin and destination customs, a receiving state, an operations center), each publishing its public key in its own zone, not arbitrary validators.
+How to reach a recipient that was not foreseen when the emblem was issued (the customs authority of a country to which a shipment is diverted, for example) is an open issue ({{open-issues}}).
+Each ciphertext is bound to its emblem and map key (for example, as COSE external additional authenticated data), so that it cannot be moved into another emblem or field.
+A profile may also require that an encrypted value be accompanied by a salted digest of its plaintext, visible to all, so that a recipient can later prove to a third party what the issuer published; the salt, disclosed only with the plaintext, keeps values with few possibilities from being guessed.
 
-* It identifies validators to issuers' servers, which is unacceptable where inspection patterns are sensitive (and fatal to undetectable validation).
-* Answers that differ per client cannot be shared through resolver caches, so the restricted tier becomes an application API with DNS framing.
-* Standardizing mandatory client identification for DNS lookups creates a precedent that could be misused well beyond DIEM.
+Authenticated DNS views, in which the server authenticates the client and returns different data to different audiences, are an alternative that this document does not recommend as the general mechanism:
+
+* They identify validators to issuers' servers, which is unacceptable where inspection patterns are sensitive (and fatal to undetectable validation).
+* Answers that differ per client cannot be shared through resolver caches, so the restricted tier would become an application API with DNS framing.
+  Encryption keeps every answer identical and cacheable, whether or not emblem names are delegated to a separate server ({{discovery}}).
+* Requiring client identification for emblem lookups in general would set a precedent for identified DNS lookups that could be misused well beyond DIEM.
 
 Profiles may still use authenticated access where audit of who looked is itself a requirement, but should do so knowingly.
 
@@ -512,10 +573,16 @@ An offline bundle serializes exactly that, following the pattern of the TLS DNSS
 A bundle carrying the full chain from the root runs from one to a few kilobytes, so it fits in a large QR code or an accompanying document, and can be validated at a disconnected port or in the field.
 Smaller carriers, such as common NFC tags of under a kilobyte, generally need a validator that already holds a trust anchor closer to the issuer (for its sector, or for the issuer's own zone), so that the bundle can omit the upper part of the chain.
 Signature algorithm choice matters here: newer algorithms, such as those based on elliptic curves, have much smaller keys and signatures than RSA (see {{RFC8624}} for current guidance), so issuers that expect their emblems to travel in bundles should prefer them.
-Bundle sizes will need revisiting as post-quantum algorithms, whose signatures are generally larger, come into use for DNSSEC.
-Its validity is bounded by the shortest RRSIG validity period it contains, which also bounds how long a removed emblem can be replayed.
+Post-quantum algorithms, whose keys and signatures are much larger, would make chains many times larger as they come into use for DNSSEC, which makes placing trust anchors close to issuers matter even more.
+
+A bundle's validity is bounded by the shortest RRSIG validity period it contains, which also bounds how long a removed emblem can be replayed.
 That includes the signatures of the root and TLD zones, which the issuer does not control and which typically last one to three weeks, so bundles have a limited shelf life and must be refreshed for long journeys.
-An offline validator also needs a trustworthy clock, since a validator whose clock can be set back will accept expired signatures.
+A validator that already holds a current copy of the upper chain (refreshed whenever it is online) can prefer it to the copy in the bundle, so that only the part of the chain below its own trust anchor needs to be current.
+How best to validate offline over periods longer than the upper zones' signature lifetimes is an open issue ({{open-issues}}).
+
+An offline validator needs a roughly correct clock.
+Signature validity periods run from days to weeks, so a clock that is right to within a day or so suffices, but a validator whose clock can be set back will accept expired signatures.
+A validator with no clock at all can still conclude that the data was validly signed at some time within the signatures' validity periods, which a profile may accept as evidence but not as proof that the emblem is current.
 
 Offline bundles take over the role that application-layer signed objects (such as signed CBOR) played in earlier thinking, without introducing a second signature system.
 
@@ -527,6 +594,8 @@ Removal:
   Profiles that need prompt removal should use short signature validity periods and TTLs, which in practice means online signing, and which limits the shelf life of offline bundles accordingly.
   An emblem's own validity period is a different thing: it bounds the issuer's statement, while signature lifetimes bound how long a copy can be replayed, and only the latter governs removal.
   Profiles should also be candid in their threat models that the DNS is not forgetful: passive DNS collectors may retain records indefinitely, which matters for the "learn after the fact" aspect of removability.
+  For an online validator, the query is itself the status check: authenticated denial of existence proves that an emblem has been removed, with no separate revocation mechanism.
+  Offline validators cannot make that check, and how they should learn of revocations is an open issue ({{open-issues}}).
 
 Archival:
 : Removal from the DNS is not deletion.
@@ -552,7 +621,8 @@ Several mechanisms contribute, and none is sufficient alone:
 * Self-contained answers: if everything needed for validation (including stapled endorsements, {{endorsement}}) arrives in one response, no follow-up query to the issuer or authorizing entity reveals interest.
 * Query indistinguishability: if the query that retrieves an emblem is one that ordinary clients make anyway, retrieving the emblem reveals nothing.
   For a network service, the emblem can travel in a record that clients already request when connecting, such as the asset's HTTPS record {{RFC9460}}.
-  Techniques of this kind place emblem data in the asset's own zone, so they cannot be combined with delegating emblems to a separate server through a zone cut, and they should not require changes to recursive resolvers, which would delay deployment.
+  Techniques of this kind place emblem data in the asset's own zone, so they cannot be combined with delegating emblems to a separate server, and they should not require changes to recursive resolvers, which would delay deployment.
+  How best to hide the act of validation is an open issue ({{open-issues}}).
 
 This document recommends a baseline that works with today's DNS: validators query through large shared resolvers that do not send client subnet information, over encrypted transports, and issuers publish self-contained emblems with stapled endorsements and TTLs long enough for caching to be effective.
 Against an issuer that watches its own authoritative server, this baseline hides *who* is validating but not *that* someone is, and only when the resolver's population is large enough to blend in.
@@ -566,22 +636,22 @@ Because the architecture leaves the use-case-specific choices to profiles, a pro
 A profile specifies:
 
 Data:
-: Its keys, each with a type (preferably in CDDL), and which are required, which are critical, and which are confidential; and which common keys and code lists it reuses.
+: Its map keys, each with a type (preferably in CDDL), and which are required, which are critical, and which are confidential; for numeric values, whether each is an exact decimal or floating point; and which common map keys and code lists it reuses.
 
 Layout:
-: How its data divides into facets, which facets are static and which dynamic, and the expected TTLs and signing arrangements for each ({{facets}}).
+: How its data divides into facets, which facets are static and which dynamic, which are required for which purposes, and the expected TTLs and signing arrangements for each ({{facets}}).
 
 Naming and discovery:
-: How validators learn emblem names for its assets, whether names are derived from the asset's name, conveyed out of band, or deliberately unguessable, and how the `asset` key relates to the emblem name ({{discovery}}).
+: How validators learn emblem names for its assets, whether names are derived from the asset's name, conveyed out of band, or deliberately unguessable, and how the `asset` map key relates to the emblem name ({{discovery}}).
 
 Hierarchy:
-: Whether its emblems refer to emblems of other issuers or profiles, and whether references carry digests ({{hierarchy}}).
+: Whether its emblems refer to emblems of other issuers or profiles, and whether references carry digests, optionally or always ({{hierarchy}}).
 
-Authorization:
-: Whether endorsement is required, which authorizing entities it recognizes and how validators learn of them, how endorsements are named, how an endorsement's scope is judged to cover an emblem, and whether queried or stapled endorsements are acceptable ({{endorsement}}).
+Issuer authorization:
+: Whether endorsement is required, which authorizing entities it recognizes and how validators learn of them, how endorsements are named, how an endorsement's scope is judged to cover an emblem, whether queried or stapled endorsements are acceptable, and any rule stricter than "any recognized endorsement suffices" ({{endorsement}}).
 
-Confidentiality:
-: Which values are encrypted, to whom, and how recipients' keys are found ({{confidentiality}}).
+Confidentiality and validator authorization:
+: Which values are encrypted, to which recipient roles, how recipients' keys are found, and whether salted plaintext digests are required ({{confidentiality}}).
 
 Lifecycle:
 : Removal expectations, the signature lifetimes and TTLs that follow from them, archival rules, and the level of proof of presence it supports ({{lifecycle}}).
@@ -603,16 +673,25 @@ In outline, a validator:
 1. obtains the emblem name (or an offline bundle) for the asset;
 2. retrieves the emblem records it needs, or extracts them from the bundle;
 3. validates them with DNSSEC, treating bogus data as absent and, unless the profile permits unvalidated emblems, treating unsigned data as absent;
-4. identifies the profile, checks each value against its key's type, and rejects the emblem if it contains a critical key the validator does not understand;
+4. selects the records whose profiles it understands, checks each value against its map key's type, and rejects a record if it contains a critical map key the validator does not understand;
 5. checks that the emblem identifies the asset in front of it, by FQDN and by whatever cross-check identifiers the profile defines;
 6. checks validity periods;
-7. where the profile requires authorization, validates the endorsement (queried or stapled) and checks that its scope covers the emblem;
+7. where the profile requires issuer authorization, validates an endorsement (queried, stapled, or carried in an offline bundle, so this step works offline too) and checks that its scope covers the emblem;
 8. follows references to other emblems as far as its task requires, checking digests where present;
 9. decrypts any confidential values it is entitled to read; and
 10. interprets the result under the profile, optionally retaining the validated responses as evidence ({{lifecycle}}).
 
-The steps are common to all profiles, but some of their inputs come from the profile: its keys and types (step 4), how its emblems identify their assets (step 5), and, where it requires authorization, which authorizing entities it recognizes, how their endorsements are named, and how an endorsement's scope is judged to cover an emblem (step 7).
+The result is valid, invalid, or indeterminate.
+Indeterminate means that something the profile requires for the validator's purpose could not be obtained or read: a required facet that timed out or is missing from a bundle, or a value the validator cannot decrypt ({{facets}}).
+A validator must not present an indeterminate result as invalid.
+
+The steps are common to all profiles, but some of their inputs come from the profile: its map keys and types (step 4), how its emblems identify their assets (step 5), and, where it requires issuer authorization, which authorizing entities it recognizes, how their endorsements are named, and how an endorsement's scope is judged to cover an emblem (step 7).
 These are data that a validator can load, listed in the profile template ({{profiles}}), rather than code.
+
+A validator that combines several records (following references, or decrypting one value and then checking another) should evaluate them all at one time.
+Signatures can expire between queries, and a resolver's AD bit is a judgment made once that cannot be re-examined later.
+A validator that needs consistency, or evidence it can show to others, therefore collects the RRsets with their RRSIGs and chains (in the bundle format of {{offline}}) and validates them itself at a single evaluation time.
+This is ordinary DNSSEC validation in a validating stub or library, and needs no special resolver; the collected data is also the record that supports proof of presence ({{lifecycle}}).
 
 # Meeting the Requirements {#reqs-map}
 
@@ -620,18 +699,18 @@ The following table summarizes how the architecture addresses the requirements o
 
 | Requirement | How it is addressed |
 |---|---|
-| Digital emblem format | A typed dictionary that identifies the marked asset by FQDN and names its profile, with a small set of common keys ({{data-model}}, {{strawman}}) |
+| Digital emblem format | A typed dictionary that identifies the marked asset by FQDN and names its profile, with a small set of common map keys; one record per profile where an asset falls under several ({{data-model}}, {{strawman}}) |
 | Emblem semantics | Defined by each profile ({{profiles}}); requested treatments are expressed uniformly, with an open legal basis ({{treatment}}) |
 | Discovery | A DNS query at the emblem name; authenticated denial of existence shows that no emblem exists ({{discovery}}) |
 | Query response | Authoritative servers answer every query (Assured Response) unless a profile permits Selective Response, at the cost of cacheability. Encrypted fields give every validator the same answer (Consistent Content) while restricting what each can read; audience-dependent answers (Selective Content) are possible but not recommended ({{confidentiality}}) |
-| Removable | Record removal, bounded by signature lifetimes and caching ({{lifecycle}}) |
-| Undetectable validation | Resolver mediation, caching, self-contained answers, and query indistinguishability ({{undetectable}}) |
+| Removable | Record removal, bounded by signature lifetimes and caching; for online validators, authenticated denial is the status check ({{lifecycle}}) |
+| Undetectable validation | Resolver mediation, caching, and self-contained answers; hiding the act of validation is open ({{undetectable}}) |
 | Validation | DNSSEC, in a common procedure ({{validation}}); facets let a profile validate all data or a subset, with dynamic data signed separately ({{facets}}). Profiles may permit unvalidated emblems |
-| Authorization | Endorsements published in the authorizing entity's zone, queried or stapled; key compromise is handled by DNSSEC key rollover, optional key binding in endorsements, and short signature lifetimes on stapled endorsements ({{endorsement}}). No Internet access is assumed ({{offline}}) |
-| Extensibility | New profiles and keys without protocol changes; critical keys protect validators from misreading ({{data-model}}) |
+| Authorization | Issuer authorization by endorsements published in the authorizing entity's zone, queried or stapled, from one or several authorizing entities; key compromise is handled by DNSSEC key rollover, optional key binding in endorsements, and short signature lifetimes on stapled endorsements ({{endorsement}}). No Internet access is assumed ({{offline}}) |
+| Extensibility | New profiles and map keys without protocol changes; validators skip what they do not understand, and critical map keys protect them from misreading ({{data-model}}) |
 | Data formats | Value types, with external code lists as types ({{code-lists}}) |
 | Asset identifier discovery, implicit discovery | Out-of-band conveyance of emblem names ({{discovery}}) |
-| Confidentiality | Encrypted values in signed records; enumeration-resistant names ({{confidentiality}}) |
+| Confidentiality | Encrypted values in signed records, readable by recipients the profile names (validator authorization); enumeration-resistant names ({{confidentiality}}) |
 | Proof of presence | Retained DNSSEC responses support Level 1 ({{lifecycle}}) |
 {: title="Requirements coverage"}
 
@@ -646,14 +725,14 @@ The EMBLEM RRType carries one emblem dictionary (or one facet of one) as RDATA.
 
 * The RDATA is a single CBOR {{RFC8949}} map using core deterministic encoding (Section 4.2.1 of {{RFC8949}}).
   Deterministic encoding fixes the serialization but not application-level equivalence, so the encoding must also fix canonical forms (for example, decimal mantissas without trailing zeros, integer epoch seconds) for equal emblems to have equal wire representations.
-* Map keys are small integers from a "DIEM Emblem Keys" registry (common keys) or from the key space of the profile named in the map.
-  Text names are used in this document for readability, for enumerated values as well as for keys.
-* Key 1, "profile", is required.
+* Map keys are small integers from a "DIEM Emblem Keys" registry (common map keys) or from the map key space of the profile named in the map.
+  Text names are used in this document for readability, for enumerated values as well as for map keys.
+* Map key 1, "profile", is required.
 * Enumerated values (profile identifiers, treatment actions, purposes, and the like) are small integers from registries; codes from external code lists are carried verbatim as text.
-* Decimal values use CBOR tag 4 (decimal fraction); timestamps use tag 1; language-tagged text uses tag 38; URIs use tag 32; encrypted values are COSE_Encrypt0 (tag 16) or COSE_Encrypt (tag 96); a value that exists but is unknown to the issuer is the CBOR simple value undefined.
+* Exact decimal values use CBOR tag 4 (decimal fraction) and floating-point values use CBOR floats, as each map key's definition specifies; timestamps use tag 1; language-tagged text uses tag 38; URIs use tag 32; encrypted values are COSE_Encrypt0 (tag 16) or COSE_Encrypt (tag 96); a value that exists but is unknown to the issuer is the CBOR simple value undefined.
 * RDATA contains no compressible domain names, so the type is compatible with unknown-type handling {{RFC3597}}.
-  Domain-name references are carried as text, normalized for comparison and digests (A-labels, lowercase, without a trailing dot).
-* The presentation format would be the generic `\# length hex` form of {{RFC3597}}, with CBOR diagnostic notation for human display.
+  Domain-name references are carried as text, normalized for comparison and digests (A-labels, lowercase, without a trailing dot); a reference within the same issuer may be relative to the issuer's emblem zone ({{hierarchy}}).
+* The presentation format would be the generic `\# length hex` form of {{RFC3597}}, with CBOR diagnostic notation for human display; {{encoded}} shows one record both ways.
 
 Why a CBOR map rather than SVCB-style key/value parameters {{RFC9460}}?
 Both preserve the dictionary model.
@@ -665,24 +744,24 @@ Because DNSSEC signs per RRset, packing everything into one record forfeits inde
 Profiles should split emblems into facets along the lines that validators actually query.
 
 Size needs attention at two levels.
-Individual records vary: item-level emblems like those below are well under 100 octets and class-level ones a few hundred, while a consignment emblem with transport references and several encrypted fields approaches the 1,232-octet limit commonly used for DNS over UDP, and an emblem with a stapled endorsement chain exceeds it and arrives over TCP or an encrypted transport.
+Individual records vary: item-level emblems like those below are well under 100 octets and class-level ones around a hundred, while a consignment emblem with transport references and fields encrypted to two customs authorities, or an emblem with a stapled endorsement chain, exceeds the 1,232-octet limit commonly used for DNS over UDP and arrives over TCP or an encrypted transport.
 Aggregates matter more: a consignment of 1,400 devices implies 1,400 item emblems, and validators should not have to fetch them all.
-Class-level data is published once, consignments refer to items by digest rather than listing them, and validators sample individual items or use an offline bundle prepared for the consignment.
+Class-level data is published once, consignments list classes with counts rather than items, and validators sample individual items or use an offline bundle prepared for the consignment.
 
 ## Companion RRTypes
 
 Existing RRTypes serve some facets directly: LOC {{RFC1876}} for point positions, URI {{RFC7553}} for references to documentation, TLSA {{RFC6698}} where an emblem is bound to a TLS service.
 A separate RRType for typed quantities could serve profiles that query quantities independently.
 
-New types would be needed for endorsements (ENDORSE, whose RDATA could reuse the EMBLEM encoding with a key space of its own: the endorsed issuer in place of the asset, the endorsed profile, scope, validity, and optional key and visual mark digests) and possibly for areas (polygons), which LOC does not express.
+New types would be needed for endorsements (ENDORSE, whose RDATA could reuse the EMBLEM encoding with a map key space of its own: the endorsed issuer in place of the asset, the endorsed profile, scope, validity, and optional key and visual mark digests) and possibly for areas (polygons), which LOC does not express.
 A stapled endorsement would be carried in an emblem as a byte string holding the serialized RRsets and chain, in the format of {{RFC9102}}.
 All of these, like EMBLEM, need only Expert Review for allocation {{RFC6895}}.
 
 # Example Use Cases {#examples}
 
 The following examples are sketches.
-Names, keys, and values are illustrative.
-Emblem dictionaries are shown in CBOR diagnostic notation with text keys and text enumerated values (both of which would be integers in an encoding, {{strawman}}), using the elision `...` of {{I-D.ietf-cbor-edn-literals}} for long values.
+Names, map keys, and values are illustrative.
+Emblem dictionaries are shown in CBOR diagnostic notation with text map keys and text enumerated values (both of which would be integers in an encoding, {{strawman}}), using the elision `...` of {{I-D.ietf-cbor-edn-literals}} for long values.
 Country codes beginning with "X" are user-assigned placeholders.
 
 ## IHL: A Hospital and Its Digital Services {#ex-ihl}
@@ -699,8 +778,9 @@ Issuer and authorization:
 
 Placement:
 : The asset is a network service, so its name is already known to anyone who would interact with it.
-  The hospital may publish under its `_diem` cut, at `records._diem.hospital.example` (delegated to a provider that serves emblems, with the profile deriving the emblem name from the service's name), or use one of the query-indistinguishability techniques of {{undetectable}} at the service's own name, as its profile's threat model dictates.
-  Either way, the `asset` key names the service itself, `records.hospital.example`, not the emblem name.
+  The hospital may publish under its delegated `_diem` zone, at `records._diem.hospital.example` (served by a provider that serves emblems, with the profile deriving the emblem name from the service's name), or use one of the query-indistinguishability techniques of {{undetectable}} at the service's own name, as its profile's threat model dictates.
+  Either way, the `asset` map key names the service itself, `records.hospital.example`, not the emblem name.
+  The emblem's subject is the records service, not the host it runs on or the patient data it holds ({{subject}}).
 
 ~~~ cbor-diag
 / EMBLEM at records._diem.hospital.example /
@@ -715,10 +795,10 @@ Placement:
   "valid":   [1(1793491200), 1(1801440000)],
   "issuer-name": 38(["en", "Example General Hospital"]),
   "mark":    "_mark.records._diem.hospital.example",
-  "endorsement": {                / stapled, from the ministry /
-    "by":     "health.gov.example",
-    "staple": h'...'   / ENDORSE RRset, RRSIGs, chain from root /
-  }
+  "endorsements": [               / stapled, from the ministry /
+    {"by":     "health.gov.example",
+     "staple": h'...'}  / ENDORSE RRset, RRSIGs, chain from root /
+  ]
 }
 
 / ENDORSE at 3q9v...._endorse.health.gov.example (stapled above) /
@@ -755,15 +835,18 @@ Removal:
 
 ## Logistics and Customs: A Pallet of Smartphones {#ex-logistics}
 
-A manufacturer ships 1,400 boxed smartphones on a wooden pallet.
+A manufacturer ships 1,400 boxed smartphones of one model family, in three variants, on a wooden pallet.
 A freight forwarder consolidates the pallet into a consignment.
 Customs at the destination, and eventually a recycler, need different subsets of the data.
 
-The manufacturer's zone holds class-level and item-level data:
+The manufacturer's zone holds data for the model family, for each variant, and for each item:
 
 ~~~
-x1.models._diem.maker.example.              EMBLEM  (class: model X1)
-sn-35791a7c.x1.models._diem.maker.example.  EMBLEM  (one device)
+x1.models._diem.maker.example.       EMBLEM  (family: X1)
+std.x1.models._diem.maker.example.   EMBLEM  (variant: X1)
+pro.x1.models._diem.maker.example.   EMBLEM  (variant: X1 Pro)
+max.x1.models._diem.maker.example.   EMBLEM  (variant: X1 Max)
+sn-35791a7c._diem.maker.example.     EMBLEM  (one device)
 ~~~
 
 ~~~ cbor-diag
@@ -771,40 +854,43 @@ sn-35791a7c.x1.models._diem.maker.example.  EMBLEM  (one device)
 {
   "profile": "product-class",
   "asset":   "x1.models._diem.maker.example",
-  "gtin":    "00614141999996",
   "model":   "X1",
   "dangerous-goods": {
     "un-number": "3481",  / Li-ion batteries in equipment /
     "class":     "9"
   },
   "battery-chemistry": "li-ion",
-  "battery-energy": [4([-1, 185]), "WHR"],   / 18.5 watt-hours /
   "recycling": 32("https://maker.example/recycle/x1"),
   "origin":    "VN",
   "mid-us":    "VNEXAMAK123HAN",     / US manufacturer ID /
-  "radio-auth": {"fcc-id": "2AEXAX1"},
-  "components": [
-    {"part": "battery-cell",
-     "attestation": "cell.x1.supply._diem.maker.example",
-     "digest": h'5e1b...'},
-    {"part": "display",
-     "attestation": "disp.x1.supply._diem.maker.example",
-     "digest": h'c07a...'}
-  ]
+  "radio-auth": {"fcc-id": "2AEXAX1"}
 }
 
-/ EMBLEM at sn-35791a7c.x1.models._diem.maker.example /
+/ EMBLEM at pro.x1.models._diem.maker.example /
+{
+  "profile": "product-class",
+  "asset":   "pro.x1.models._diem.maker.example",
+  "class-ref": "x1.models",          / relative: same issuer /
+  "gtin":    "00614141999989",
+  "model":   "X1 Pro",
+  "battery-energy": [4([-1, 193]), "WHR"]   / 19.3 watt-hours /
+}
+
+/ EMBLEM at sn-35791a7c._diem.maker.example /
 {
   "profile": "product-item",
-  "asset":   "sn-35791a7c.x1.models._diem.maker.example",
+  "asset":   "sn-35791a7c._diem.maker.example",
+  "class-ref": "pro.x1.models",
   "serial":  "35791A7C",
   "made":    1(1790812800)
 }
 ~~~
 
-The hazardous materials, origin, and regulatory data is published once for the model, not 1,400 times.
-A validator holding a device's emblem name finds class data by removing the leftmost label.
-The manufacturer mirrors the attestations it holds for key components in its own zone, each with a digest of the original, so that a validator can trace components without contacting the component suppliers.
+The hazardous materials, origin, and regulatory data is published once for the model family, not 1,400 times.
+Each variant adds only what differs from the family (here its GTIN and its battery's energy, which affects dangerous goods handling); the X1 and X1 Max variants are like the X1 Pro, with 18.5 and 24.1 watt-hours.
+Variants are split only where validators act differently, so color, for example, does not warrant one.
+Each item emblem names its class explicitly, relative to the manufacturer's emblem zone, so a validator follows that reference rather than deriving the class from the item's name, and the reference cannot lead outside the manufacturer's zone.
+Supplier and component detail is commercially sensitive and invisible to consumers, so the manufacturer keeps it internal or, where a regulator needs it, publishes it encrypted to that regulator; a profile structures such data as its use case needs.
 
 The pallet carries the ISPM 15 mark {{ISPM15}}, authorized by the national plant protection organization (NPPO) of the country where the mark was applied.
 The pallet producer publishes the mark's data, and the NPPO endorses the producer (a queried endorsement suffices here, since nobody needs to hide that they checked a pallet):
@@ -821,6 +907,7 @@ The pallet producer publishes the mark's data, and the NPPO endorses the produce
 / ENDORSE at pallets.example._endorse.nppo.gov.example /
 ~~~
 
+The consignment is an emblem subject in its own right, because it is what customs acts on: it is declared, examined, and released as a unit, whatever it contains.
 The forwarder wraps everything in a consignment emblem at an unguessable name in its own zone (an NSEC3-signed zone, so the name cannot be enumerated), with live position in a shared online-signed zone:
 
 ~~~ cbor-diag
@@ -840,18 +927,20 @@ The forwarder wraps everything in a consignment emblem at an unguessable name in
     "carrier":          "EXSC",
     "vessel":           "EXAMPLE STAR",
     "voyage":           "042E",
-    "port-of-lading":   "VNSGN",   / UN/LOCODE /
+    "port-of-lading":   "VNSGN",   / UN LOCODE /
     "port-of-unlading": "USLAX"
   },
-  "valuation":  16(...),           / encrypted to customs /
-  "parties":    16(...),           / encrypted: seller, buyer, /
+  "valuation":  96(...),           / encrypted to origin and   /
+                                   / destination customs       /
+  "parties":    96(...),           / likewise: seller, buyer,  /
                                    / importer of record, bond, /
                                    / ship-to, consolidator,    /
                                    / stuffing location         /
   "contents": [
     {"emblem": "p-20261031-0042._diem.pallets.example"},
-    {"emblem": "x1.models._diem.maker.example", "count": 1400,
-     "items-digest": h'9a0c...'}   / digest of the item name list /
+    {"emblem": "std.x1.models._diem.maker.example", "count": 600},
+    {"emblem": "pro.x1.models._diem.maker.example", "count": 500},
+    {"emblem": "max.x1.models._diem.maker.example", "count": 300}
   ]
 }
 
@@ -869,8 +958,14 @@ Its plaintext uses monetary amounts (a decimal and an ISO 4217 code) and the com
   "related-party": false,
   "incoterm":   "FOB",                   / ICC Incoterms rule /
   "invoice":    "INV-2026-10-4471",
-  "unit-price": [4([-1, 4125]), "USD"],  / 412.50 /
-  "quantity":   1400,
+  "lines": [
+    {"class-ref": "std.x1.models._diem.maker.example", "line-qty": 600,
+     "unit-price": [4([1, 38]), "USD"]},    / 380 /
+    {"class-ref": "pro.x1.models._diem.maker.example", "line-qty": 500,
+     "unit-price": [4([1, 42]), "USD"]},    / 420 /
+    {"class-ref": "max.x1.models._diem.maker.example", "line-qty": 300,
+     "unit-price": [4([0, 465]), "USD"]}    / 465 /
+  ],
   "total":      [4([2, 5775]), "USD"],   / 577,500 /
   "freight":    [4([2, 32]), "USD"],     / 3,200 /
   "insurance":  [4([0, 1155]), "USD"],   / 1,155 /
@@ -881,9 +976,9 @@ Its plaintext uses monetary amounts (a decimal and an ISO 4217 code) and the com
 Customs:
 : The officer scans the consignment's code, validates the forwarder's emblem, and decrypts the valuation and parties with the customs authority's key.
   The container and seal numbers, gross mass, and transport references tie the emblem to the carrier's manifest and to what is physically in front of the officer.
-  National requirements (here a US tariff number, manufacturer identification code, and radio equipment authorization) are keys like any other.
-  Because amounts are typed decimals with currency codes, software can check that unit price times quantity matches the total and the declared item count, compare the unit price with what is plausible for HS 8517.13 and model X1, and compute the customs value on the authority's own basis (adding freight and insurance where it values on a CIF basis).
-  The officer also checks the dangerous goods classification, optionally validates the pallet's ISPM 15 data and NPPO endorsement, and can follow the class emblem's component attestations where supply-chain tracing is required.
+  National requirements (here a US tariff number, manufacturer identification code, and radio equipment authorization) are map keys like any other.
+  Because amounts are typed decimals with currency codes, software can check that the lines' unit prices times quantities sum to the total and match the declared counts, compare each unit price with what is plausible for HS 8517.13 and that variant, and compute the customs value on the authority's own basis (adding freight and insurance where it values on a CIF basis).
+  The officer also checks the dangerous goods classification (following each variant's reference to the family's data), and optionally validates the pallet's ISPM 15 data and NPPO endorsement.
   A retained copy of the validated response records exactly what the forwarder declared, which matters if the valuation is later disputed.
 
 Authenticity:
@@ -891,11 +986,11 @@ Authenticity:
   Here, the officer checks that a device's item emblem exists in the brand's own zone and validates with DNSSEC, which confirms that the manufacturer issued that serial number for that model; a serial that does not resolve, or resolves to a different model, is a red flag.
   The officer must still confirm that the zone really is the brand's (lookalike domains are the counterfeiter's obvious move), for example against a list of brand domains the customs authority maintains.
   An emblem alone does not prove that a physical item is the one the serial was issued for, since a counterfeiter can copy a genuine serial.
-  Profiles can address cloning by binding a device-held key into the item emblem so that the device can prove possession when scanned, or by letting the manufacturer flag serials reported in implausible places.
+  Profiles can address cloning by binding a device-held key into the item emblem so that the device can prove possession when scanned, or by letting the manufacturer flag serials reported in implausible places (binding carriers to assets in general is an open issue, {{open-issues}}).
   This replaces today's bespoke per-brand lookup arrangements with one validator that works for every brand and every shipment.
 
 Recycler:
-: Years later, a recycler scans one device, validates its item emblem, walks up to the class emblem, and reads the battery chemistry and energy.
+: Years later, a recycler scans one device, validates its item emblem, follows its class references to the variant and family emblems, and reads the battery chemistry and energy.
   It never sees the commercial data, and never needs to.
 
 ## Diplomatic Pouches {#ex-pouch}
@@ -904,7 +999,8 @@ Under Article 27 of the Vienna Convention on Diplomatic Relations {{VCDR}}, the 
 Those marks are easy to forge and impossible to verify at a distance, and the requirements document describes both the misuse of pouches for smuggling and the pressure to inspect them.
 
 Issuer:
-: The sending state's ministry of foreign affairs publishes an emblem for each pouch under an unguessable label in its own zone, using a denial-of-existence method that prevents enumeration ({{confidentiality}}).
+: The sending state's ministry of foreign affairs (MFA) publishes an emblem for each pouch under an unguessable label in its own zone, using a denial-of-existence method that prevents enumeration ({{confidentiality}}).
+  The emblem's subject is the pouch itself; the seal number is a cross-check identifier that ties the emblem to the physical pouch ({{subject}}).
 
 ~~~ cbor-diag
 / EMBLEM at k7q2-9xwm-4hd3._pouch._diem.mfa.gov.example /
@@ -953,7 +1049,9 @@ Vehicles:
 Personnel:
 : Each person's emblem is published under an unguessable label that is replaced at every rotation, so that a name scanned once does not identify the person in future deployments.
   The emblem carries the mission, the person's protected status, and a validity period.
-  Their identity is not in it, even in encrypted form, because it is not needed to confirm that the bearer is a member of the mission.
+  Their identity is not in it, even in encrypted form.
+  The emblem therefore shows that a badge was issued by the mission, not that the person carrying it is the one it was issued to.
+  Binding a badge to its bearer, so that a copied or relayed badge does not pass, is an open issue ({{open-issues}}); a stolen badge is handled by removing its emblem and by the checkpoint's own checks.
 
 ~~~ cbor-diag
 / EMBLEM at r4nq-8w2k-c7tz._p._diem.mission.example /
@@ -976,7 +1074,7 @@ Personnel:
 ~~~
 
 Validator:
-: At a checkpoint, a soldier scans a badge, validates the emblem and the mission's endorsement, and learns that the bearer is a member of the mission.
+: At a checkpoint, a soldier scans a badge, validates the emblem and the mission's endorsement, and learns that the badge is a current badge of the mission.
   If a badge does not validate, nothing on it can be trusted, including any instructions it carries.
   The mission therefore publishes its point of contact and what it asks in that case ("if-invalid") in its own emblem, which the validator validates separately and can cache or carry in an offline bundle.
 
@@ -992,6 +1090,43 @@ A Ramsar-designated wetland would carry a location area and a designation endors
 A law firm could mark a case file as privileged, requesting that it not be read without review and citing the applicable rule of its jurisdiction, with no authorizing entity at all.
 Each is a profile, not a new architecture.
 
+# Open Issues {#open-issues}
+
+The following questions are open for working group discussion.
+For each, this document describes a rational interim behavior or the options it sees, without settling the matter.
+
+Binding a carrier to its asset:
+: DNSSEC prevents an emblem from being moved to another name, and binding each facet and ciphertext to its emblem prevents mixing them between emblems.
+  Nothing in the DNS data, however, binds a physical label, tag, or badge to the asset it is attached to: a label can be copied onto another item, and a badge scanned at one checkpoint can be relayed to someone else.
+  Possible approaches include a key held in the tag or badge that answers a validator's challenge (which works offline), and a salted digest of a photograph or other attribute shown on the carrier, which a person compares without the emblem revealing whose it is.
+  Neither addresses a stolen carrier, which needs removal of the emblem and checks by the people at the scene.
+
+Recipients not known at issuance:
+: Encryption to named recipients ({{confidentiality}}) works where a profile can name its recipients' roles in advance.
+  It does not by itself reach a party that was not foreseen, such as the customs authority of a country to which a flight is diverted.
+  Options include keys held for a role or region by an organization that recipients trust (a policy question more than a protocol one), re-encryption to new recipients in a dynamic facet when plans change, and disclosure by the issuer on request (which identifies the validator to the issuer).
+
+Long offline periods:
+: Offline bundles expire with their shortest signature lifetime, including those of the root and TLD zones ({{offline}}).
+  Options for journeys longer than those lifetimes include validators preferring their own cached upper chain to the bundle's, trust anchors closer to issuers so that the issuer controls the relevant signature lifetimes, re-bundling at transshipment points, and profiles that accept validation as of a past time where that suffices.
+  Larger post-quantum signatures add to the pressure to anchor closer to issuers.
+
+Revocation for offline validators:
+: Online validators learn of removal from authenticated denial of existence ({{lifecycle}}).
+  Offline validators cannot, so a removed emblem in a bundle remains acceptable until its signatures expire.
+  A signed status list of revoked emblems (as digests), carried with the validator's trust anchors, would help where revocation must be prompt (a stolen badge, for example), but publishing such a list defeats the purpose of removal where the aim is to stop being findable, as it may be under IHL.
+
+Visual mark mismatch:
+: When a visual mark's digest does not match the digest in the endorsement ({{marks}}), the interim behavior is that the mark is not authorized while the emblem and its data remain valid.
+  Validators must not present such a mark as authorized and should tell the person that it is not, rather than silently omitting it, and must keep "mark not authorized" visibly distinct from "emblem invalid", so that a protected site does not appear unprotected.
+  The digest is computed over the image octets as published in the mark facet, before any transfer compression and without canonicalization.
+  The alternative of treating a mismatch as invalidating the emblem is open, and profiles may be stricter.
+
+Hiding the act of validation:
+: The baseline of {{undetectable}} (large shared resolvers without client subnet information, encrypted transports, caching, and self-contained emblems with stapled endorsements) hides who is validating, but not that someone is, from an issuer that watches its own authoritative server.
+  Hiding the act itself needs the query that retrieves an emblem to be one that ordinary clients make anyway; candidate techniques, such as carrying the emblem in a record clients already request, constrain where emblems can be published and are not yet worked out.
+  The interim behavior is the baseline, and a profile that needs more says so in its threat model.
+
 # Security Considerations
 
 DNSSEC provides integrity and origin authentication for emblem data only if validators actually validate.
@@ -1000,15 +1135,18 @@ Unsigned emblem data must also be treated as absent unless the profile permits u
 
 An emblem is a statement by a zone holder.
 Validators must not infer authorization from publication; where a profile requires authorization, the validator must validate the endorsement as well.
-Lookalike and typosquatted domains are not addressed by DNSSEC; cross-check identifiers and endorsements mitigate them.
+Lookalike and typosquatted domains are not addressed by DNSSEC; endorsements (or a validator's own list of known issuers) mitigate them, and cross-check identifiers on the asset add a further check.
 
 Removal is bounded by signature lifetimes and caching, and passive DNS collection means that removed emblems may remain known.
 Profiles with removability requirements must account for both.
 
 Encrypted values protect confidentiality, but metadata remains visible: the emblem name, the profile, the size of the ciphertext, and the timing of queries.
+Where a value's size is itself sensitive, the profile can fix its length or require padding before encryption.
 Unguessable labels, with compact denial or NSEC3 rather than plain NSEC, reduce enumeration risk.
 
 Full audits of hierarchical emblems cause many queries; offline bundles and caching mitigate this, and profiles should state what depth of validation they expect.
+
+Citations of a treatment's legal basis ({{treatment}}) are compared and displayed, never dereferenced as part of validation, so an emblem cannot direct validators to fetch from a third party.
 
 Validity checks depend on time.
 A validator whose clock is wrong, or can be set back by an attacker, will accept expired signatures and replayed emblems, which matters most for offline validators.
@@ -1046,9 +1184,49 @@ Encrypted values:
 # IANA Considerations
 
 This document has no IANA actions.
-A specification realizing it would request the EMBLEM and ENDORSE RRTypes and create registries for common keys, profile identifiers, and code-list identifiers.
+A specification realizing it would request the EMBLEM and ENDORSE RRTypes and create registries for common map keys, profile identifiers, and code-list identifiers.
 
 --- back
+
+# Encoded Example {#encoded}
+
+The ISPM 15 emblem of {{ex-logistics}}, encoded as the strawman describes ({{strawman}}), is 59 octets.
+In CBOR diagnostic notation with the integer map keys and enumerated values that an encoding uses (the comments give the names used in this document, and the numbers are illustrative):
+
+~~~ cbor-diag
+{
+  1 / profile /: 5 / ispm15 /,
+  2 / asset /: "p-20261031-0042._diem.pallets.example",
+  -1 / country /: "VN",
+  -2 / producer /: "000123",
+  -3 / measure /: "HT"
+}
+~~~
+
+As a resource record in the generic presentation format of {{RFC3597}} (EMBLEM has no type code, so a private-use type number stands in):
+
+~~~
+p-20261031-0042._diem.pallets.example. 3600 IN TYPE65280 \# 59 (
+    a50105027825702d3230323631303331
+    2d303034322e5f6469656d2e70616c6c
+    6574732e6578616d706c652062564e21
+    6630303031323322624854 )
+~~~
+
+# Changes from draft-rosenberg-diem-architecture-02
+{:numbered="false" removeinrfc="true"}
+
+* Defined the subject of an emblem: the asset named by the `asset` map key, which may be a person, place, or thing, physical or digital.
+* Allowed several profiles for one asset (one record per profile), with validators skipping profiles and map keys they do not understand.
+* Allowed issuer-defined map keys, named under a domain the issuer controls.
+* Distinguished issuer authorization from validator authorization, and allowed an emblem to carry several endorsements.
+* Generalized hierarchy to digital and mixed assets, using explicit references (relative within an issuer) instead of deriving names, and reworked the logistics example accordingly.
+* Added required facets and an indeterminate validation result, and evaluation at a single time for validators that combine records.
+* Clarified recipients, ciphertext binding, and optional salted plaintext digests in confidentiality, and that the `_diem` delegation is operational.
+* Revised offline clock and shelf-life text, and noted that a live query is the status check for removal.
+* Let profiles choose exact decimals or floating point per map key.
+* Added an Open Issues section and an encoded example.
+* Terminology: "map key", "external code", and "delegation".
 
 # Changes from draft-rosenberg-diem-architecture-01
 {:numbered="false" removeinrfc="true"}
@@ -1073,4 +1251,4 @@ A specification realizing it would request the EMBLEM and ENDORSE RRTypes and cr
 # Acknowledgments
 {:numbered="false"}
 
-The author thanks the participants of the DIEM working group for their drafts and comments.
+The author thanks the participants of the DIEM working group for their drafts and comments, and Rohan Mahy for a detailed review of -01, including the suggestion of salted plaintext digests.
