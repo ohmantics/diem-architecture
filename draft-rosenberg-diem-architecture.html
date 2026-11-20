@@ -10,7 +10,7 @@
        This document describes an architecture for digital emblems in which emblems are authenticated, typed metadata about assets, published in the DNS and protected by DNSSEC.
 A single architecture serves many use cases.
 Use cases differ in the shape of their metadata, which is described by profiles, rather than in their transport or trust machinery.
-The document illustrates the architecture with a strawman encoding (an EMBLEM resource record carrying a deterministic CBOR map with registered, typed keys) and with worked examples drawn from International Humanitarian Law, logistics and customs, diplomatic pouches, and peacekeeping. 
+The document illustrates the architecture with a strawman encoding (an EMBLEM resource record carrying a deterministic CBOR map with registered, typed map keys) and with worked examples drawn from International Humanitarian Law, logistics and customs, diplomatic pouches, and peacekeeping. 
     " name="description">
 <meta content="xml2rfc 3.35.0" name="generator">
 <meta content="digital emblems" name="keyword">
@@ -21,13 +21,13 @@ The document illustrates the architecture with a strawman encoding (an EMBLEM re
 <!-- Generator version information:
   xml2rfc 3.35.0
     Python 3.14.10
-    ConfigArgParse 1.9.0
+    ConfigArgParse 1.10.1
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.14.3
+    platformdirs 4.14.7
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
@@ -1051,7 +1051,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Rosenberg</td>
-<td class="center">Expires 20 May 2027</td>
+<td class="center">Expires 24 May 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1064,12 +1064,12 @@ svg {
 <dd class="internet-draft">draft-rosenberg-diem-architecture-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-11-16" class="published">16 November 2026</time>
+<time datetime="2026-11-20" class="published">20 November 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-05-20">20 May 2027</time></dd>
+<dd class="expires"><time datetime="2027-05-24">24 May 2027</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1085,7 +1085,7 @@ svg {
 <p id="section-abstract-1">This document describes an architecture for digital emblems in which emblems are authenticated, typed metadata about assets, published in the DNS and protected by DNSSEC.
 A single architecture serves many use cases.
 Use cases differ in the shape of their metadata, which is described by profiles, rather than in their transport or trust machinery.
-The document illustrates the architecture with a strawman encoding (an EMBLEM resource record carrying a deterministic CBOR map with registered, typed keys) and with worked examples drawn from International Humanitarian Law, logistics and customs, diplomatic pouches, and peacekeeping.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+The document illustrates the architecture with a strawman encoding (an EMBLEM resource record carrying a deterministic CBOR map with registered, typed map keys) and with worked examples drawn from International Humanitarian Law, logistics and customs, diplomatic pouches, and peacekeeping.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1122,7 +1122,7 @@ The document illustrates the architecture with a strawman encoding (an EMBLEM re
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 20 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 24 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1167,13 +1167,16 @@ The document illustrates the architecture with a strawman encoding (an EMBLEM re
             <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-naming-and-discovery" class="internal xref">Naming and Discovery</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
-                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-identifying-the-asset" class="internal xref">Identifying the Asset</a></p>
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-the-subject-of-an-emblem" class="internal xref">The Subject of an Emblem</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
-                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-choosing-emblem-names" class="internal xref">Choosing Emblem Names</a></p>
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-identifying-the-asset" class="internal xref">Identifying the Asset</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
-                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-retrieval" class="internal xref">Retrieval</a></p>
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-choosing-emblem-names" class="internal xref">Choosing Emblem Names</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-retrieval" class="internal xref">Retrieval</a></p>
 </li>
             </ul>
 </li>
@@ -1181,22 +1184,25 @@ The document illustrates the architecture with a strawman encoding (an EMBLEM re
             <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-data-model" class="internal xref">Data Model</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
-                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-keys-and-types" class="internal xref">Keys and Types</a></p>
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-map-keys-and-types" class="internal xref">Map Keys and Types</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
-                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-value-types" class="internal xref">Value Types</a></p>
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-several-profiles-for-one-as" class="internal xref">Several Profiles for One Asset</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
-                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-treatment" class="internal xref">Treatment</a></p>
+                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-value-types" class="internal xref">Value Types</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.4">
-                <p id="section-toc.1-1.6.2.4.1"><a href="#section-6.4" class="auto internal xref">6.4</a>.  <a href="#name-visual-marks" class="internal xref">Visual Marks</a></p>
+                <p id="section-toc.1-1.6.2.4.1"><a href="#section-6.4" class="auto internal xref">6.4</a>.  <a href="#name-treatment" class="internal xref">Treatment</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.5">
-                <p id="section-toc.1-1.6.2.5.1"><a href="#section-6.5" class="auto internal xref">6.5</a>.  <a href="#name-external-code-lists-as-valu" class="internal xref">External Code Lists as Value Types</a></p>
+                <p id="section-toc.1-1.6.2.5.1"><a href="#section-6.5" class="auto internal xref">6.5</a>.  <a href="#name-visual-marks" class="internal xref">Visual Marks</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.6">
-                <p id="section-toc.1-1.6.2.6.1"><a href="#section-6.6" class="auto internal xref">6.6</a>.  <a href="#name-facets-signed-once-signed-o" class="internal xref">Facets: Signed Once, Signed Often</a></p>
+                <p id="section-toc.1-1.6.2.6.1"><a href="#section-6.6" class="auto internal xref">6.6</a>.  <a href="#name-external-code-lists-as-valu" class="internal xref">External Code Lists as Value Types</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.7">
+                <p id="section-toc.1-1.6.2.7.1"><a href="#section-6.7" class="auto internal xref">6.7</a>.  <a href="#name-facets-signed-once-signed-o" class="internal xref">Facets: Signed Once, Signed Often</a></p>
 </li>
             </ul>
 </li>
@@ -1259,28 +1265,37 @@ The document illustrates the architecture with a strawman encoding (an EMBLEM re
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.18">
-            <p id="section-toc.1-1.18.1"><a href="#section-18" class="auto internal xref">18</a>. <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+            <p id="section-toc.1-1.18.1"><a href="#section-18" class="auto internal xref">18</a>. <a href="#name-open-issues" class="internal xref">Open Issues</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.19">
-            <p id="section-toc.1-1.19.1"><a href="#section-19" class="auto internal xref">19</a>. <a href="#name-privacy-considerations" class="internal xref">Privacy Considerations</a></p>
+            <p id="section-toc.1-1.19.1"><a href="#section-19" class="auto internal xref">19</a>. <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.20">
-            <p id="section-toc.1-1.20.1"><a href="#section-20" class="auto internal xref">20</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+            <p id="section-toc.1-1.20.1"><a href="#section-20" class="auto internal xref">20</a>. <a href="#name-privacy-considerations" class="internal xref">Privacy Considerations</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.21">
-            <p id="section-toc.1-1.21.1"><a href="#section-21" class="auto internal xref">21</a>. <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+            <p id="section-toc.1-1.21.1"><a href="#section-21" class="auto internal xref">21</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.22">
-            <p id="section-toc.1-1.22.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-changes-from-draft-rosenber" class="internal xref">Changes from draft-rosenberg-diem-architecture-01</a></p>
+            <p id="section-toc.1-1.22.1"><a href="#section-22" class="auto internal xref">22</a>. <a href="#name-informative-references" class="internal xref">Informative References</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.23">
-            <p id="section-toc.1-1.23.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-changes-from-draft-rosenberg" class="internal xref">Changes from draft-rosenberg-diem-architecture-00</a></p>
+            <p id="section-toc.1-1.23.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-encoded-example" class="internal xref">Encoded Example</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.24">
-            <p id="section-toc.1-1.24.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+            <p id="section-toc.1-1.24.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-changes-from-draft-rosenber" class="internal xref">Changes from draft-rosenberg-diem-architecture-02</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.25">
-            <p id="section-toc.1-1.25.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+            <p id="section-toc.1-1.25.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-changes-from-draft-rosenberg" class="internal xref">Changes from draft-rosenberg-diem-architecture-01</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.26">
+            <p id="section-toc.1-1.26.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-changes-from-draft-rosenberg-" class="internal xref">Changes from draft-rosenberg-diem-architecture-00</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.27">
+            <p id="section-toc.1-1.27.1"><a href="#appendix-E" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.28">
+            <p id="section-toc.1-1.28.1"><a href="#appendix-F" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
 </li>
         </ul>
 </nav>
@@ -1338,30 +1353,46 @@ In the strawman, the EMBLEM RRType.<a href="#section-2-2.6.1" class="pilcrow">¶
           <p id="section-2-2.8.1">A subset of an emblem's data that is retrieved, cached, or signed independently of the rest, and is therefore published as its own RRset (a separate RRType, or a separate owner name).<a href="#section-2-2.8.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-2-2.9">Key:</dt>
+<dt id="section-2-2.9">Subject:</dt>
         <dd style="margin-left: 1.5em" id="section-2-2.10">
-          <p id="section-2-2.10.1">A registered identifier for one property in an emblem's dictionary, with a defined value type.<a href="#section-2-2.10.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.10.1">The asset that an emblem describes, named by the emblem's <code>asset</code> map key (<a href="#subject" class="auto internal xref">Section 5.1</a>).<a href="#section-2-2.10.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-2-2.11">Code list:</dt>
+<dt id="section-2-2.11">Map key:</dt>
         <dd style="margin-left: 1.5em" id="section-2-2.12">
-          <p id="section-2-2.12.1">An externally maintained controlled vocabulary (for example, ISO 3166-1 country codes <span>[<a href="#ISO3166" class="cite xref">ISO3166</a>]</span> or UNECE Recommendation 20 unit codes) used as the type of a key's value.<a href="#section-2-2.12.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.12.1">A registered identifier for one property in an emblem's dictionary, with a defined value type.
+This document says "map key" for these, and reserves "key" alone for cryptographic keys.<a href="#section-2-2.12.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-2-2.13">Endorsement:</dt>
+<dt id="section-2-2.13">Code list:</dt>
         <dd style="margin-left: 1.5em" id="section-2-2.14">
-          <p id="section-2-2.14.1">A statement by an authorizing entity that an emblem issuer is authorized to issue emblems of a given profile or scope, published as an RRset in the authorizing entity's own zone.<a href="#section-2-2.14.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.14.1">An externally maintained controlled vocabulary (for example, ISO 3166-1 country codes <span>[<a href="#ISO3166" class="cite xref">ISO3166</a>]</span> or UNECE Recommendation 20 unit codes) used as the type of a map key's value.<a href="#section-2-2.14.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-2-2.15">Visual mark:</dt>
+<dt id="section-2-2.15">Issuer authorization:</dt>
         <dd style="margin-left: 1.5em" id="section-2-2.16">
-          <p id="section-2-2.16.1">An image of the physical emblem, sign, or logo associated with an emblem's profile or issuer, carried as an optional facet (<a href="#marks" class="auto internal xref">Section 6.4</a>).
-A visual mark depicts; it is not itself an emblem, and confers nothing.<a href="#section-2-2.16.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.16.1">A third party's assurance that an emblem issuer is entitled to issue emblems of a given profile or scope; in this architecture, an endorsement (<a href="#endorsement" class="auto internal xref">Section 8</a>).<a href="#section-2-2.16.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-2-2.17">Offline bundle:</dt>
+<dt id="section-2-2.17">Validator authorization:</dt>
         <dd style="margin-left: 1.5em" id="section-2-2.18">
-          <p id="section-2-2.18.1">A self-contained serialization of emblem RRsets, their RRSIGs, and the DNSSEC chain needed to validate them, suitable for transfer without network access.<a href="#section-2-2.18.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.18.1">Permission for a validator to read restricted emblem data; in this architecture, possession of a key to which the data is encrypted (<a href="#confidentiality" class="auto internal xref">Section 9</a>).<a href="#section-2-2.18.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.19">Endorsement:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.20">
+          <p id="section-2-2.20.1">A statement by an authorizing entity that an emblem issuer is authorized to issue emblems of a given profile or scope, published as an RRset in the authorizing entity's own zone.<a href="#section-2-2.20.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.21">Visual mark:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.22">
+          <p id="section-2-2.22.1">An image of the physical emblem, sign, or logo associated with an emblem's profile or issuer, carried as an optional facet (<a href="#marks" class="auto internal xref">Section 6.5</a>).
+A visual mark depicts; it is not itself an emblem, and confers nothing.<a href="#section-2-2.22.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.23">Offline bundle:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.24">
+          <p id="section-2-2.24.1">A self-contained serialization of emblem RRsets, their RRSIGs, and the DNSSEC chain needed to validate them, suitable for transfer without network access.<a href="#section-2-2.24.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
 </dl>
@@ -1389,9 +1420,9 @@ Application-layer cryptography is reserved for what DNSSEC does not provide: con
         <dd class="break"></dd>
 <dt id="section-3-1.5">Typed data:</dt>
         <dd style="margin-left: 1.5em" id="section-3-1.6">
-          <p id="section-3-1.6.1">Every key has a registered type, and every value can be checked against it.
+          <p id="section-3-1.6.1">Every map key has a registered type, and every value can be checked against it.
 A validator must be able to tell malformed data from well-formed data, and to tell one property from another without reading free text.
-Externally maintained code lists are value types bound to keys, not free-standing records.<a href="#section-3-1.6.1" class="pilcrow">¶</a></p>
+Externally maintained code lists are value types bound to map keys, not free-standing records.<a href="#section-3-1.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-3-1.7">Query granularity equals record granularity:</dt>
@@ -1403,7 +1434,7 @@ The DNS offers projection (by owner name and type) but no predicates, so the rec
         <dd class="break"></dd>
 <dt id="section-3-1.9">Encryption, not audience-dependent answers:</dt>
         <dd style="margin-left: 1.5em" id="section-3-1.10">
-          <p id="section-3-1.10.1">Restricted fields are encrypted inside signed records, so that every validator receives the same cacheable, signed answer and only authorized validators can read the restricted parts.
+          <p id="section-3-1.10.1">Restricted fields are encrypted inside signed records, so that every validator receives the same cacheable, signed answer and only validators holding the right keys can read the restricted parts.
 Serving different answers to authenticated clients is possible as a deployment option but is not the architectural primitive (see <a href="#confidentiality" class="auto internal xref">Section 9</a>).<a href="#section-3-1.10.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
@@ -1437,7 +1468,8 @@ It does not need to be online during validation.<a href="#section-4-3" class="pi
 <pre>
   authorizing entity       emblem issuer          validator
   (state, treaty body,     (hospital, maker,      (armed forces,
-   NPPO, ministry ...)      shipper, MFA ...)      customs, recycler)
+   NPPO, ministry ...)      shipper, foreign       customs, recycler)
+                            ministry ...)
          |                        |                      |
          | endorsement            | emblem records       |
          | (own zone; queried     | (DNSSEC-signed,      |
@@ -1454,7 +1486,7 @@ It does not need to be online during validation.<a href="#section-4-3" class="pi
         </figcaption></figure>
 <p id="section-4-5">Trust in an emblem's content derives from the DNSSEC chain of trust to the zone that publishes it.
 A validated EMBLEM RRset establishes that the holder of the zone's signing keys published that data, and nothing more.
-Whether that zone holder is entitled to make the statement is a separate question, answered by endorsements where a profile requires them and otherwise by the validator's own knowledge (a customs officer knows which shippers they deal with).<a href="#section-4-5" class="pilcrow">¶</a></p>
+Whether that zone holder is entitled to make the statement is a separate question (issuer authorization), answered by endorsements where a profile requires them and otherwise by the validator's own knowledge (a customs officer knows which shippers they deal with).<a href="#section-4-5" class="pilcrow">¶</a></p>
 <p id="section-4-6">This model has a single technical root (the DNS root zone), but it does not create a central authority over emblems.
 No party needs another's permission to publish emblems in its own zone, and authorizing entities operate independently of one another.
 Profiles whose frameworks require it can place their own authorizing entities wherever the framework places them.<a href="#section-4-6" class="pilcrow">¶</a></p>
@@ -1482,65 +1514,80 @@ Validators must validate themselves or use a validating resolver they trust over
       <h2 id="name-naming-and-discovery">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-naming-and-discovery" class="section-name selfRef">Naming and Discovery</a>
       </h2>
-<div id="identifying-the-asset">
+<div id="subject">
 <section id="section-5.1">
-        <h3 id="name-identifying-the-asset">
-<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-identifying-the-asset" class="section-name selfRef">Identifying the Asset</a>
+        <h3 id="name-the-subject-of-an-emblem">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-the-subject-of-an-emblem" class="section-name selfRef">The Subject of an Emblem</a>
         </h3>
-<p id="section-5.1-1">Assets are identified by domain names.
-How a validator learns an asset's name depends on the asset:<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-1">The subject of an emblem is the asset it describes, which the emblem names in its <code>asset</code> map key.
+An asset may be a person, a place, or a thing, and may be physical, digital, or a combination of the two; the architecture treats them all alike.
+The emblem name is a handle for finding the emblem, not its subject: it may be the asset's own name, a name derived from it, or an unguessable label conveyed on or with the asset.
+Cross-check identifiers in the emblem (a seal number, a serial number, a container number) identify the same subject by other means.
+For a diplomatic pouch, for example, the subject is the pouch, and its seal number is a cross-check identifier; for a hospital's records service, the subject is the service, not the host that runs it or the data it holds.
+How firmly a physical carrier (a label, a tag, a badge) is bound to its subject is a separate question, listed as an open issue (<a href="#open-issues" class="auto internal xref">Section 18</a>).<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="identifying-the-asset">
+<section id="section-5.2">
+        <h3 id="name-identifying-the-asset">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-identifying-the-asset" class="section-name selfRef">Identifying the Asset</a>
+        </h3>
+<p id="section-5.2-1">Assets are identified by domain names.
+Names are compared in DNS A-label form <span>[<a href="#RFC5890" class="cite xref">RFC5890</a>]</span>, lowercase and without a trailing dot, so internationalized names are carried as A-labels (<a href="#strawman" class="auto internal xref">Section 16</a>).
+How a validator learns an asset's name depends on the asset:<a href="#section-5.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.1-2.1">
-            <p id="section-5.1-2.1.1">For digital services, the asset's own name is usually already known (the validator is about to connect to it).<a href="#section-5.1-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.2-2.1">
+            <p id="section-5.2-2.1.1">For digital services, the asset's own name is usually already known (the validator is about to connect to it).<a href="#section-5.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.1-2.2">
-            <p id="section-5.1-2.2.1">For physical assets, the name is conveyed out of band: printed, in a QR code, in an NFC or RFID tag, or in shipping documents.
+          <li class="normal" id="section-5.2-2.2">
+            <p id="section-5.2-2.2.1">For physical assets, the name is conveyed out of band: printed, in a QR code, in an NFC or RFID tag, or in shipping documents.
 A URI form for emblem names would let general-purpose scanners recognize them.
-The existing <code>dns:</code> URI scheme <span>[<a href="#RFC4501" class="cite xref">RFC4501</a>]</span> already names a DNS owner name, class, and type, and may suffice; a payload that also carries an offline bundle (<a href="#offline" class="auto internal xref">Section 10</a>) may warrant something more.<a href="#section-5.1-2.2.1" class="pilcrow">¶</a></p>
+The existing <code>dns:</code> URI scheme <span>[<a href="#RFC4501" class="cite xref">RFC4501</a>]</span> already names a DNS owner name, class, and type, and may suffice; a payload that also carries an offline bundle (<a href="#offline" class="auto internal xref">Section 10</a>) may warrant something more.<a href="#section-5.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.1-2.3">
-            <p id="section-5.1-2.3.1">Some assets are found by other means (a location, a registry listing), and <span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> notes asset identifier discovery as a possible future extension.<a href="#section-5.1-2.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.2-2.3">
+            <p id="section-5.2-2.3.1">Some assets are found by other means (a location, a registry listing), and <span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> notes asset identifier discovery as a possible future extension.<a href="#section-5.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
 </div>
 <div id="choosing-emblem-names">
-<section id="section-5.2">
+<section id="section-5.3">
         <h3 id="name-choosing-emblem-names">
-<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-choosing-emblem-names" class="section-name selfRef">Choosing Emblem Names</a>
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-choosing-emblem-names" class="section-name selfRef">Choosing Emblem Names</a>
         </h3>
-<p id="section-5.2-1">The architecture does not constrain emblem names.
+<p id="section-5.3-1">The architecture does not constrain emblem names.
 An issuer may publish emblems at an asset's own name or at any name in a zone it controls, and validators use whatever emblem name they are given; they do not construct names from a fixed pattern.
-Where a profile derives an emblem name from an asset's name (for example, for network services whose names validators already know), that profile defines the derivation.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
-<p id="section-5.2-2">As an operational recommendation, issuers should consider placing emblem names under a dedicated label, <code>_diem</code> in this document's examples, because it permits a zone cut:<a href="#section-5.2-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.2-3">
+Where a profile derives an emblem name from an asset's name (for example, for network services whose names validators already know), that profile defines the derivation.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2">As an operational recommendation, issuers should consider placing emblem names under a dedicated label, <code>_diem</code> in this document's examples, because it permits delegating them (a zone cut, in the terms of <span>[<a href="#RFC9499" class="cite xref">RFC9499</a>]</span>):<a href="#section-5.3-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.3-3">
 <pre>
 example.org.                  NS   ordinary-dns.example.net.
 _diem.example.org.            NS   ns1.diem-provider.example.
                               DS   ...
-</pre><a href="#section-5.2-3" class="pilcrow">¶</a>
+</pre><a href="#section-5.3-3" class="pilcrow">¶</a>
 </div>
-<p id="section-5.2-4">With a cut at <code>_diem</code>, the issuer's ordinary DNS service needs no knowledge of DIEM.
+<p id="section-5.3-4">With <code>_diem</code> delegated, the issuer's ordinary DNS service needs no knowledge of DIEM.
 Emblem names are served by an authoritative server specialized for emblems, which may be backed by an asset-management or inventory system rather than a zone file, and which may have different security and signing arrangements.
-Resolvers need no DIEM awareness at all; they cache and validate emblem records like any other RRType.<a href="#section-5.2-4" class="pilcrow">¶</a></p>
-<p id="section-5.2-5">The cut also addresses a practical obstacle.
+Resolvers need no DIEM awareness at all; they cache and validate emblem records like any other RRType.
+The delegation is purely operational: answers from the delegated zone are ordinary DNS answers, identical for every client and cacheable by any resolver.<a href="#section-5.3-4" class="pilcrow">¶</a></p>
+<p id="section-5.3-5">The delegation also addresses a practical obstacle.
 Many hosted DNS services and provisioning interfaces accept only a fixed list of RRTypes, and some network equipment mishandles types it does not recognize, even though <span>[<a href="#RFC3597" class="cite xref">RFC3597</a>]</span> requires transparent handling.
-An issuer whose existing provider cannot serve new RRTypes need not change providers for the rest of its zone; it delegates only the emblem names.<a href="#section-5.2-5" class="pilcrow">¶</a></p>
-<p id="section-5.2-6">Below the cut, the issuer arranges names however suits its inventory.
-Hierarchical names express hierarchical assets (<a href="#hierarchy" class="auto internal xref">Section 7</a>), and wildcards <span>[<a href="#RFC4592" class="cite xref">RFC4592</a>]</span> can cover classes of assets that share all of their data.
-Wildcards have limits: they do not match names that exist (including empty non-terminals), and because every name under a wildcard appears to carry an emblem, they must not be used where the existence of an emblem for a particular item (such as a serial number) is itself meant to be evidence.<a href="#section-5.2-6" class="pilcrow">¶</a></p>
+An issuer whose existing provider cannot serve new RRTypes need not change providers for the rest of its zone; it delegates only the emblem names.<a href="#section-5.3-5" class="pilcrow">¶</a></p>
+<p id="section-5.3-6">Below the delegation, the issuer arranges names however suits its inventory.
+Names may mirror the structure of what they describe, but validators follow explicit references between emblems (<a href="#hierarchy" class="auto internal xref">Section 7</a>) rather than deriving one name from another, and wildcards <span>[<a href="#RFC4592" class="cite xref">RFC4592</a>]</span> can cover classes of assets that share all of their data.
+Wildcards have limits: they do not match names that exist (including empty non-terminals), and because every name under a wildcard appears to carry an emblem, they must not be used where the existence of an emblem for a particular item (such as a serial number) is itself meant to be evidence.<a href="#section-5.3-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="retrieval">
-<section id="section-5.3">
+<section id="section-5.4">
         <h3 id="name-retrieval">
-<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-retrieval" class="section-name selfRef">Retrieval</a>
+<a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-retrieval" class="section-name selfRef">Retrieval</a>
         </h3>
-<p id="section-5.3-1">A validator retrieves an emblem by querying for the relevant RRType at the emblem name, and validates the response with DNSSEC.
-Where a profile places facets in separate RRsets (<a href="#facets" class="auto internal xref">Section 6.6</a>), the validator retrieves only the facets it needs.
-A validator that receives NXDOMAIN or NODATA with a valid denial-of-existence proof learns authoritatively that no emblem (or no such facet) is published.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
-<p id="section-5.3-2">DNS transports are interchangeable here.
-Large responses use TCP or encrypted transports (DoT <span>[<a href="#RFC7858" class="cite xref">RFC7858</a>]</span>, DoH <span>[<a href="#RFC8484" class="cite xref">RFC8484</a>]</span>, DoQ <span>[<a href="#RFC9250" class="cite xref">RFC9250</a>]</span>); the encrypted transports also provide confidentiality between the validator and its resolver.<a href="#section-5.3-2" class="pilcrow">¶</a></p>
+<p id="section-5.4-1">A validator retrieves an emblem by querying for the relevant RRType at the emblem name, and validates the response with DNSSEC.
+Where a profile places facets in separate RRsets (<a href="#facets" class="auto internal xref">Section 6.7</a>), the validator retrieves only the facets it needs.
+A validator that receives NXDOMAIN or NODATA with a valid denial-of-existence proof learns authoritatively that no emblem (or no such facet) is published.<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+<p id="section-5.4-2">DNS transports are interchangeable here.
+Large responses use TCP or encrypted transports (DoT <span>[<a href="#RFC7858" class="cite xref">RFC7858</a>]</span>, DoH <span>[<a href="#RFC8484" class="cite xref">RFC8484</a>]</span>, DoQ <span>[<a href="#RFC9250" class="cite xref">RFC9250</a>]</span>); the encrypted transports also provide confidentiality between the validator and its resolver.<a href="#section-5.4-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1550,31 +1597,43 @@ Large responses use TCP or encrypted transports (DoT <span>[<a href="#RFC7858" c
       <h2 id="name-data-model">
 <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-data-model" class="section-name selfRef">Data Model</a>
       </h2>
-<p id="section-6-1">An emblem is a dictionary: a set of key/value pairs, in which values may themselves be arrays or dictionaries.
-Every emblem identifies the profile that defines its keys.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<div id="keys-and-types">
+<p id="section-6-1">An emblem is a dictionary: a set of map keys and their values, in which values may themselves be arrays or dictionaries.
+Every emblem identifies the profile that defines its map keys.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<div id="map-keys-and-types">
 <section id="section-6.1">
-        <h3 id="name-keys-and-types">
-<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-keys-and-types" class="section-name selfRef">Keys and Types</a>
+        <h3 id="name-map-keys-and-types">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-map-keys-and-types" class="section-name selfRef">Map Keys and Types</a>
         </h3>
-<p id="section-6.1-1">Keys are drawn from registries.
-A small set of common keys applies to all profiles (profile identifier, the FQDN of the marked asset, cross-check asset identifiers, validity period, issuer display name, and the treatment requested of validators, <a href="#treatment" class="auto internal xref">Section 6.3</a>).
-The charter requires that emblems explicitly identify the marked asset by FQDN <span>[<a href="#CHARTER" class="cite xref">CHARTER</a>]</span>, so the asset key is required even when the emblem is published at the asset's own name.
-Each profile defines additional keys.
-Every key definition specifies the value's type, preferably in CDDL <span>[<a href="#RFC8610" class="cite xref">RFC8610</a>]</span>.
-A plausible arrangement is one registry of common keys, a key space scoped to each registered profile (so that profiles allocate keys without coordinating with one another), and a private-use range for experimentation; profiles that share a concept (an ISO 3166 country of origin, say) should reuse a common key rather than define their own.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
-<p id="section-6.1-2">A validator checks each value against its key's type.
+<p id="section-6.1-1">Map keys are drawn from registries.
+A small set of common map keys applies to all profiles (profile identifier, the FQDN of the marked asset, cross-check asset identifiers, validity period, issuer display name, and the treatment requested of validators, <a href="#treatment" class="auto internal xref">Section 6.4</a>).
+The charter requires that emblems explicitly identify the marked asset by FQDN <span>[<a href="#CHARTER" class="cite xref">CHARTER</a>]</span>, so the <code>asset</code> map key is required even when the emblem is published at the asset's own name.
+Each profile defines additional map keys.
+Every map key definition specifies the value's type, preferably in CDDL <span>[<a href="#RFC8610" class="cite xref">RFC8610</a>]</span>.
+A plausible arrangement is one registry of common map keys, a map key space scoped to each registered profile (so that profiles allocate map keys without coordinating with one another), and a private-use range for experimentation; profiles that share a concept (an ISO 3166 country of origin, say) should reuse a common map key rather than define their own.
+Map keys outside the registries are text strings named under a domain the issuer controls, so that issuers can define keys of their own (for internal forensic data, say) without coordination or collision.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-2">A validator checks each value against its map key's type.
 A value that does not match its type is an error, not a curiosity to be displayed.
-Unknown keys may be ignored, unless the emblem marks them as critical (in the manner of the COSE "crit" header parameter <span>[<a href="#RFC9052" class="cite xref">RFC9052</a>]</span>), in which case a validator that does not understand them must not rely on the emblem.
+Validators skip map keys they do not understand, unless the emblem marks them as critical (in the manner of the COSE "crit" header parameter <span>[<a href="#RFC9052" class="cite xref">RFC9052</a>]</span>), in which case a validator that does not understand them must not rely on the emblem.
 This lets profiles evolve without breaking old validators, while still allowing an issuer to say "do not act on this emblem unless you understand all of it".<a href="#section-6.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="value-types">
+<div id="multi-profile">
 <section id="section-6.2">
-        <h3 id="name-value-types">
-<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-value-types" class="section-name selfRef">Value Types</a>
+        <h3 id="name-several-profiles-for-one-as">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-several-profiles-for-one-as" class="section-name selfRef">Several Profiles for One Asset</a>
         </h3>
-<p id="section-6.2-1">The following value types cover the use cases identified so far:<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-1">An asset may fall under several profiles: a shipment of batteries is both a consignment and dangerous goods, and a medical facility may carry both a protective emblem and a facility registration.
+Its EMBLEM RRset then holds one record per profile, each naming its own profile.
+A validator uses the records whose profiles it understands and skips the rest, just as it skips unknown map keys, so a dangerous goods inspector need not interpret a customs profile to find the hazard data.
+One query retrieves all of them, and each profile's data stays separately typed and separately interpreted.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="value-types">
+<section id="section-6.3">
+        <h3 id="name-value-types">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-value-types" class="section-name selfRef">Value Types</a>
+        </h3>
+<p id="section-6.3-1">The following value types cover the use cases identified so far:<a href="#section-6.3-1" class="pilcrow">¶</a></p>
 <span id="name-value-types-2"></span><table class="center" id="table-1">
           <caption>
 <a href="#table-1" class="selfRef">Table 1</a>:
@@ -1593,7 +1652,11 @@ This lets profiles evolve without breaking old validators, while still allowing 
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">decimal</td>
-              <td class="text-left" rowspan="1" colspan="1">exact decimal fixed-point (base-10 exponent and mantissa), never binary floating point</td>
+              <td class="text-left" rowspan="1" colspan="1">exact decimal fixed-point (base-10 exponent and mantissa)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">floating point</td>
+              <td class="text-left" rowspan="1" colspan="1">binary floating point, only where the map key's definition permits it</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">quantity</td>
@@ -1617,8 +1680,8 @@ This lets profiles evolve without breaking old validators, while still allowing 
               <td class="text-left" rowspan="1" colspan="1">a value from a list defined by DIEM or by the profile (in an encoding, a small integer)</td>
             </tr>
             <tr>
-              <td class="text-left" rowspan="1" colspan="1">code</td>
-              <td class="text-left" rowspan="1" colspan="1">a code from an external code list fixed by the key's definition, carried verbatim</td>
+              <td class="text-left" rowspan="1" colspan="1">external code</td>
+              <td class="text-left" rowspan="1" colspan="1">a code from an external code list fixed by the map key's definition, carried verbatim in the list's canonical form and compared by that list's rules (case-sensitive unless the list says otherwise)</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">citation</td>
@@ -1634,11 +1697,11 @@ This lets profiles evolve without breaking old validators, while still allowing 
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">media</td>
-              <td class="text-left" rowspan="1" colspan="1">an embedded image, such as a visual mark (<a href="#marks" class="auto internal xref">Section 6.4</a>)</td>
+              <td class="text-left" rowspan="1" colspan="1">an embedded image, such as a visual mark (<a href="#marks" class="auto internal xref">Section 6.5</a>)</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">encrypted</td>
-              <td class="text-left" rowspan="1" colspan="1">ciphertext of any of the above, readable by authorized validators (<a href="#confidentiality" class="auto internal xref">Section 9</a>)</td>
+              <td class="text-left" rowspan="1" colspan="1">ciphertext of any of the above, readable by the validators it is encrypted to (<a href="#confidentiality" class="auto internal xref">Section 9</a>)</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">dictionary, array</td>
@@ -1646,112 +1709,121 @@ This lets profiles evolve without breaking old validators, while still allowing 
             </tr>
           </tbody>
         </table>
-<p id="section-6.2-3">Two distinctions from <span>[<a href="#I-D.woodcock-faltstrom-external-registry-rrtypes" class="cite xref">I-D.woodcock-faltstrom-external-registry-rrtypes</a>]</span> are worth adopting: a value that is <em>not applicable</em> (the key is absent) differs from a value that <em>exists but is unknown to the issuer</em> (the key is present with an explicit "unknown" marker), and an issuer's signed assertion of ignorance is itself meaningful.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-3">Each map key's definition says whether a numeric value is an exact decimal or a floating-point number.
+Binary floating point cannot represent most decimal fractions exactly, so implementations can round the same value differently.
+That is unacceptable for some values (monetary amounts above all, and declared quantities that two parties must agree on) and harmless for others (many physical measurements).
+A protocol specification would need to guide profile authors to consider exactness, rounding, and special values (not-a-number, infinities, negative zero) carefully when choosing.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-4">Two distinctions from <span>[<a href="#I-D.woodcock-faltstrom-external-registry-rrtypes" class="cite xref">I-D.woodcock-faltstrom-external-registry-rrtypes</a>]</span> are worth adopting: a value that is <em>not applicable</em> (the map key is absent) differs from a value that <em>exists but is unknown to the issuer</em> (the map key is present with an explicit "unknown" marker), and an issuer's signed assertion of ignorance is itself meaningful.<a href="#section-6.3-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="treatment">
-<section id="section-6.3">
+<section id="section-6.4">
         <h3 id="name-treatment">
-<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-treatment" class="section-name selfRef">Treatment</a>
+<a href="#section-6.4" class="section-number selfRef">6.4. </a><a href="#name-treatment" class="section-name selfRef">Treatment</a>
         </h3>
-<p id="section-6.3-1">Emblems often exist to ask something of whoever encounters the asset: that it not be attacked, opened, detained, or read.
+<p id="section-6.4-1">Emblems often exist to ask something of whoever encounters the asset: that it not be attacked, opened, detained, or read.
 Such requests are expressed as <em>treatments</em>, each a modality (prohibit, request, or require) applied to an action from a small enumeration (attack, open, detain, inspect, read, report, and so on).
-Because actions are enumerated, software can ask "does anything here prohibit inspection?" across emblems of different profiles without understanding the law behind each.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
-<p id="section-6.3-2">A treatment says what is asked, not why.
+Because actions are enumerated, software can ask "does anything here prohibit inspection?" across emblems of different profiles without understanding the law behind each.
+Modalities and actions come from one common DIEM registry shared by all profiles; each profile states which treatments it may request (<a href="#profiles" class="auto internal xref">Section 13</a>).<a href="#section-6.4-1" class="pilcrow">¶</a></p>
+<p id="section-6.4-2">A treatment says what is asked, not why.
 Its legal basis is carried separately, as one or more citations in an identified scheme (for example, a European Legislation Identifier, an Akoma Ntoso identifier, or a URI), with optional language-tagged text, and optionally a jurisdiction (an ISO 3166 code or an indication of international law).
 Citations are open-ended, so profiles do not have to enumerate the laws they might invoke; validators compare citations within a scheme and display them to people, but do not need to interpret them.
-A profile may still list the bases it expects, where that set is small (as for the instruments of IHL).<a href="#section-6.3-2" class="pilcrow">¶</a></p>
-<p id="section-6.3-3">A treatment is a request backed, if at all, by the cited framework.
+A profile may still list the bases it expects, where that set is small (as for the instruments of IHL).<a href="#section-6.4-2" class="pilcrow">¶</a></p>
+<p id="section-6.4-3">A treatment is a request backed, if at all, by the cited framework.
 The emblem does not enforce it, and does not confer the protection or privilege it signals: under IHL, for example, the distinctive emblem indicates protection that exists by law, whether or not the emblem is displayed.
-Where a profile requires authorization, the endorsement's scope covers the purposes and treatments the issuer may claim.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+Where a profile requires issuer authorization, the endorsement's scope covers the purposes and treatments the issuer may claim.<a href="#section-6.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="marks">
-<section id="section-6.4">
+<section id="section-6.5">
         <h3 id="name-visual-marks">
-<a href="#section-6.4" class="section-number selfRef">6.4. </a><a href="#name-visual-marks" class="section-name selfRef">Visual Marks</a>
+<a href="#section-6.5" class="section-number selfRef">6.5. </a><a href="#name-visual-marks" class="section-name selfRef">Visual Marks</a>
         </h3>
-<p id="section-6.4-1">People recognize emblems by sight, and many use cases have a physical sign that people already know: the red cross, red crescent, and red crystal, the Blue Shield, the ISPM 15 mark, a brand's logo.
+<p id="section-6.5-1">People recognize emblems by sight, and many use cases have a physical sign that people already know: the red cross, red crescent, and red crystal, the Blue Shield, the ISPM 15 mark, a brand's logo.
 An emblem may refer to a visual mark (an image of that sign), published as its own facet so that validators that display nothing never retrieve it.
-The approach follows Brand Indicators for Message Identification (BIMI) <span>[<a href="#I-D.brand-indicators-for-message-identification" class="cite xref">I-D.brand-indicators-for-message-identification</a>]</span>, which lets mail clients display a sender's logo, with three differences.<a href="#section-6.4-1" class="pilcrow">¶</a></p>
+The approach follows Brand Indicators for Message Identification (BIMI) <span>[<a href="#I-D.brand-indicators-for-message-identification" class="cite xref">I-D.brand-indicators-for-message-identification</a>]</span>, which lets mail clients display a sender's logo, with three differences.<a href="#section-6.5-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-6.4-2.1">
-            <p id="section-6.4-2.1.1">The visual mark is published in the DNS as a facet, not fetched from a web server, so retrieving it reveals no more than retrieving the emblem, and it can be cached, stapled, and carried in an offline bundle.<a href="#section-6.4-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-6.5-2.1">
+            <p id="section-6.5-2.1.1">The visual mark is published in the DNS as a facet, not fetched from a web server, so retrieving it reveals no more than retrieving the emblem, and it can be cached, stapled, and carried in an offline bundle.<a href="#section-6.5-2.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-6.4-2.2">
-            <p id="section-6.4-2.2.1">Where BIMI relies on a certificate authority to verify that a logo belongs to a domain, here that role is played by the endorsement: the authorizing entity includes a digest of the visual mark in the endorsement's scope, attesting that this issuer may display it.<a href="#section-6.4-2.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-6.5-2.2">
+            <p id="section-6.5-2.2.1">Where BIMI relies on a certificate authority to verify that a logo belongs to a domain, here that role is played by the endorsement: the authorizing entity includes a digest of the visual mark in the endorsement's scope, attesting that this issuer may display it.<a href="#section-6.5-2.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-6.4-2.3">
-            <p id="section-6.4-2.3.1">The authorizing entity is whoever the profile's framework names (a ministry for the distinctive emblems, an NPPO for the ISPM 15 mark), not only a trademark registry.<a href="#section-6.4-2.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-6.5-2.3">
+            <p id="section-6.5-2.3.1">The authorizing entity is whoever the profile's framework names (a ministry for the distinctive emblems, an NPPO for the ISPM 15 mark), not only a trademark registry.<a href="#section-6.5-2.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-6.4-3">A validator displays a visual mark only if its digest is covered by a validated endorsement, or if it matches a canonical rendering that the validator already holds for an enumerated value in the emblem (for example, the red cross for a protective red cross purpose).
+<p id="section-6.5-3">A validator displays a visual mark only if its digest is covered by a validated endorsement, or if it matches a canonical rendering that the validator already holds for an enumerated value in the emblem (for example, the red cross for a protective red cross purpose).
 Otherwise the validator does not display it, or labels it clearly as unverified.
-A visual mark never overrides the emblem's data: if the two disagree, the data governs and the disagreement is itself a reason for suspicion.<a href="#section-6.4-3" class="pilcrow">¶</a></p>
-<p id="section-6.4-4">Marks use a restricted image format, such as the SVG Tiny Portable/Secure profile that BIMI defines <span>[<a href="#I-D.svg-tiny-ps-abrotman" class="cite xref">I-D.svg-tiny-ps-abrotman</a>]</span>, which excludes scripts, external references, and animation.
-A simple symbol in this format is on the order of a hundred octets; detailed logos can run to several kilobytes.<a href="#section-6.4-4" class="pilcrow">¶</a></p>
+A visual mark never overrides the emblem's data: if the two disagree, the data governs and the disagreement is itself a reason for suspicion.<a href="#section-6.5-3" class="pilcrow">¶</a></p>
+<p id="section-6.5-4">Marks use a restricted image format, such as the SVG Tiny Portable/Secure profile that BIMI defines <span>[<a href="#I-D.svg-tiny-ps-abrotman" class="cite xref">I-D.svg-tiny-ps-abrotman</a>]</span>, which excludes scripts, external references, and animation.
+A simple symbol in this format is on the order of a hundred octets; detailed logos can run to several kilobytes.<a href="#section-6.5-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="code-lists">
-<section id="section-6.5">
+<section id="section-6.6">
         <h3 id="name-external-code-lists-as-valu">
-<a href="#section-6.5" class="section-number selfRef">6.5. </a><a href="#name-external-code-lists-as-valu" class="section-name selfRef">External Code Lists as Value Types</a>
+<a href="#section-6.6" class="section-number selfRef">6.6. </a><a href="#name-external-code-lists-as-valu" class="section-name selfRef">External Code Lists as Value Types</a>
         </h3>
-<p id="section-6.5-1">Much of the data that emblems carry is already standardized elsewhere: country codes, currency codes, units of measure, location codes, commodity classifications, dangerous goods numbers.
+<p id="section-6.6-1">Much of the data that emblems carry is already standardized elsewhere: country codes, currency codes, units of measure, location codes, commodity classifications, dangerous goods numbers.
 DIEM should use these code lists rather than reinvent them, and should not mirror them into IANA registries.
-On both points this document agrees with <span>[<a href="#I-D.woodcock-faltstrom-external-registry-rrtypes" class="cite xref">I-D.woodcock-faltstrom-external-registry-rrtypes</a>]</span>, which argues them well.<a href="#section-6.5-1" class="pilcrow">¶</a></p>
-<p id="section-6.5-2">Where this document differs is in <em>where the code list attaches</em>.
+On both points this document agrees with <span>[<a href="#I-D.woodcock-faltstrom-external-registry-rrtypes" class="cite xref">I-D.woodcock-faltstrom-external-registry-rrtypes</a>]</span>, which argues them well.<a href="#section-6.6-1" class="pilcrow">¶</a></p>
+<p id="section-6.6-2">Where this document differs is in <em>where the code list attaches</em>.
 In the external-registry RRTypes, a record names a code list (for example, "ISO 3166-1") and carries a code, an optional quantity, and an optional free-text descriptor.
 The property that the code describes (whether "QA" is a flag state, a place of incorporation, or a country of origin) is carried only in the descriptor, which receivers must not interpret.
-Two records about the same asset that use the same code list are therefore indistinguishable to software.<a href="#section-6.5-2" class="pilcrow">¶</a></p>
-<p id="section-6.5-3">In this architecture, the code list is the <em>type</em> of a key:<a href="#section-6.5-3" class="pilcrow">¶</a></p>
+Two records about the same asset that use the same code list are therefore indistinguishable to software.<a href="#section-6.6-2" class="pilcrow">¶</a></p>
+<p id="section-6.6-3">In this architecture, the code list is the <em>type</em> of a map key:<a href="#section-6.6-3" class="pilcrow">¶</a></p>
 <span id="name-where-the-meaning-lives"></span><figure id="figure-2">
-          <div class="lang-cbor-diag sourcecode" id="section-6.5-4.1">
+          <div class="lang-cbor-diag sourcecode" id="section-6.6-4.1">
 <pre>
 / external-registry pattern (illustrative): meaning only in text /
 ISO 3166-1 - QA "flag state"
 ISO 3166-1 - US "state of incorporation"
 
-/ typed keys: the key carries the meaning, the code list the type /
+/ typed map keys: the map key carries the meaning, the code list the type /
 { "flag-state": "QA", "incorporated-in": "US" }
 </pre>
 </div>
 <figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
 <a href="#name-where-the-meaning-lives" class="selfRef">Where the meaning lives</a>
           </figcaption></figure>
-<p id="section-6.5-5">A key definition says "the value is an ISO 3166-1 alpha-2 code", so a validator can reject "Q4" or "qa" (the codes are compared verbatim, as in the external-registry draft), and software can act on "flag-state" directly.
+<p id="section-6.6-5">A map key definition says "the value is an ISO 3166-1 alpha-2 code", so a validator can reject "Q4" or "qa" (the codes are compared verbatim, as in the external-registry draft), and software can act on "flag-state" directly.
 The alternative, recovering the property by parsing descriptor strings such as "flag state", is error-prone: descriptors are unconstrained text, so the same property can be written in many ways, in any language, abbreviated, or misspelled, and different parser implementors may interpret the strings differently.
-Where a key admits values from more than one code list, the value carries a small code-list identifier alongside the code.
-The registry of code-list identifiers references external lists without copying their contents.<a href="#section-6.5-5" class="pilcrow">¶</a></p>
-<p id="section-6.5-6">This approach also reaches code lists that do not fit a one-RRType-per-maintainer pattern.
+Where a map key admits values from more than one code list, the value carries a small code-list identifier alongside the code.
+The registry of code-list identifiers references external lists without copying their contents.<a href="#section-6.6-5" class="pilcrow">¶</a></p>
+<p id="section-6.6-6">This approach also reaches code lists that do not fit a one-RRType-per-maintainer pattern.
 The OPCW use case in <span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> needs Chemical Abstracts Service registry numbers, IUPAC names, GHS hazard pictograms, and UN dangerous goods numbers <span>[<a href="#UNMODELREGS" class="cite xref">UNMODELREGS</a>]</span>; the logistics example below needs Harmonized System codes <span>[<a href="#HS" class="cite xref">HS</a>]</span> and ISPM 15 treatment codes <span>[<a href="#ISPM15" class="cite xref">ISPM15</a>]</span>.
-Each of these becomes a value type that keys can use, with no new RRType per maintainer.<a href="#section-6.5-6" class="pilcrow">¶</a></p>
+Each of these becomes a value type that map keys can use, with no new RRType per maintainer.<a href="#section-6.6-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="facets">
-<section id="section-6.6">
+<section id="section-6.7">
         <h3 id="name-facets-signed-once-signed-o">
-<a href="#section-6.6" class="section-number selfRef">6.6. </a><a href="#name-facets-signed-once-signed-o" class="section-name selfRef">Facets: Signed Once, Signed Often</a>
+<a href="#section-6.7" class="section-number selfRef">6.7. </a><a href="#name-facets-signed-once-signed-o" class="section-name selfRef">Facets: Signed Once, Signed Often</a>
         </h3>
-<p id="section-6.6-1">Some emblem data never changes for the life of the emblem (a serial number, a hazard classification, a legal designation).
+<p id="section-6.7-1">Some emblem data never changes for the life of the emblem (a serial number, a hazard classification, a legal designation).
 Some changes constantly (the location of a container in transit).
 draft-rosenberg-diem-architecture-00 described this as "signed" versus "informational" fields.
-In a DNS-native design, the distinction maps onto RRsets:<a href="#section-6.6-1" class="pilcrow">¶</a></p>
+In a DNS-native design, the distinction maps onto RRsets:<a href="#section-6.7-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-6.6-2.1">
-            <p id="section-6.6-2.1.1">Static facets are published in RRsets that can be signed offline and given long TTLs.<a href="#section-6.6-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-6.7-2.1">
+            <p id="section-6.7-2.1.1">Static facets are published in RRsets that can be signed offline and given long TTLs.<a href="#section-6.7-2.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-6.6-2.2">
-            <p id="section-6.6-2.2.1">Dynamic facets are published in separate RRsets with short TTLs.
+          <li class="normal" id="section-6.7-2.2">
+            <p id="section-6.7-2.2.1">Dynamic facets are published in separate RRsets with short TTLs.
 Because any key in a zone's DNSKEY RRset can sign any RRset in that zone, an online signing key in the same zone could also forge the static data.
-Dynamic data that must be signed online is therefore placed in a separate, online-signed zone (for example, one shared zone for all of an issuer's dynamic facets), so the static data remains under offline keys.<a href="#section-6.6-2.2.1" class="pilcrow">¶</a></p>
+Dynamic data that must be signed online is therefore placed in a separate, online-signed zone (for example, one shared zone for all of an issuer's dynamic facets), so the static data remains under offline keys.<a href="#section-6.7-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-6.6-3">Facets are also the unit of retrieval.
+<p id="section-6.7-3">Facets are also the unit of retrieval.
 A recycler that only needs the battery chemistry does not need to fetch the declared customs value, and a customs officer does not need recycling instructions.
-Each facet is either a distinct RRType at the emblem name (a LOC record for position, a URI record <span>[<a href="#RFC7553" class="cite xref">RFC7553</a>]</span> for a link to documentation) or a distinct owner name below it.<a href="#section-6.6-3" class="pilcrow">¶</a></p>
-<p id="section-6.6-4">This replaces the application-layer hashing of the -00 draft.
-DNSSEC already signs each RRset; a validator that retrieves a facet gets integrity for exactly that facet.<a href="#section-6.6-4" class="pilcrow">¶</a></p>
+Each facet is either a distinct RRType at the emblem name (a LOC record for position, a URI record <span>[<a href="#RFC7553" class="cite xref">RFC7553</a>]</span> for a link to documentation) or a distinct owner name below it.<a href="#section-6.7-3" class="pilcrow">¶</a></p>
+<p id="section-6.7-4">Just as a profile says which facets are static and which dynamic, it says which facets a validator needs for which purpose (<a href="#profiles" class="auto internal xref">Section 13</a>).
+Optional facets add information but never change the outcome of validation.
+A validator that cannot obtain a required facet (because the query times out, the facet is not in an offline bundle, or it is encrypted to someone else) reaches an indeterminate result for that purpose, not an invalid one (<a href="#validation" class="auto internal xref">Section 14</a>).
+The distinction matters: a protected site must not appear unprotected because a query timed out.<a href="#section-6.7-4" class="pilcrow">¶</a></p>
+<p id="section-6.7-5">This replaces the application-layer hashing of the -00 draft.
+DNSSEC already signs each RRset; a validator that retrieves a facet gets integrity for exactly that facet.<a href="#section-6.7-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1761,24 +1833,29 @@ DNSSEC already signs each RRset; a validator that retrieves a facet gets integri
       <h2 id="name-hierarchy-and-composition">
 <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-hierarchy-and-composition" class="section-name selfRef">Hierarchy and Composition</a>
       </h2>
-<p id="section-7-1">Physical assets nest: devices in cartons, cartons on pallets, pallets in containers, containers on ships.
+<p id="section-7-1">Assets nest and compose.
+Physical assets nest: devices in cartons, cartons on pallets, pallets in containers, containers on ships.
+Digital assets compose: an organization operates services, a service runs on hosts, a dataset is held on storage.
+The two mix: a hard drive is a physical object (and may be dangerous goods in transit) that carries a dataset with protections of its own.
 Different parties attest to different levels.
-The architecture expresses this in two ways:<a href="#section-7-1" class="pilcrow">¶</a></p>
+The architecture expresses all of these by explicit reference: an emblem names the emblems it relates to, and each referenced emblem is validated through its own zone's DNSSEC chain.<a href="#section-7-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7-2.1">
-          <p id="section-7-2.1.1">Within one issuer's zone, by DNS hierarchy.
-An emblem name for a product class can have child names for individual items, so that class-wide data (model, hazard classification) is published once and item-specific data (serial number) is published per item.<a href="#section-7-2.1.1" class="pilcrow">¶</a></p>
+          <p id="section-7-2.1.1">Within one issuer, a reference can be written relative to the issuer's emblem zone (for example, its <code>_diem</code> zone).
+Relative references keep records small, and they cannot lead outside the issuer's zone.
+A product class, for instance, is published once, with class-wide data (model, hazard classification), and each item's emblem refers to its class and adds only item-specific data (serial number).<a href="#section-7-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-7-2.2">
-          <p id="section-7-2.2.1">Across issuers, by reference.
-A shipper's consignment emblem refers to the manufacturer's emblems by domain name.
-Each referenced emblem is validated through its own zone's DNSSEC chain.
-Where the referencing party wants to fix exactly what it saw at the time (for example, a declaration to customs), the reference also carries a digest of the referenced RRset.<a href="#section-7-2.2.1" class="pilcrow">¶</a></p>
+          <p id="section-7-2.2.1">Across issuers, references are absolute names.
+A shipper's consignment emblem refers to the manufacturer's class emblems; a hard drive's emblem, describing the physical object, refers to the emblem of the dataset it holds, which carries the data's own protections.<a href="#section-7-2.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-7-3">A validator walks as far as its task requires.
+<p id="section-7-3">Where the referencing party wants to fix exactly what it saw at the time (for example, a declaration to customs), the reference also carries a digest of the referenced RRset.
+A profile states whether references carry digests, and whether they are required.
+A digest pins the referenced data, so correcting that data means publishing a new version rather than editing it in place; a reference without a digest always resolves to the current data, which DNSSEC still authenticates.<a href="#section-7-3" class="pilcrow">¶</a></p>
+<p id="section-7-4">A validator walks as far as its task requires.
 A customs officer may validate only the shipper's consignment emblem; a recycler may validate a single device's battery facet back to the manufacturer; an audit may walk everything.
-Full walks of large consignments involve many queries, which caching, wildcards for homogeneous items, and offline bundles all mitigate.<a href="#section-7-3" class="pilcrow">¶</a></p>
+Full walks of large consignments involve many queries, which caching, wildcards for homogeneous items, and offline bundles all mitigate.<a href="#section-7-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="endorsement">
@@ -1786,7 +1863,7 @@ Full walks of large consignments involve many queries, which caching, wildcards 
       <h2 id="name-authorization-and-endorseme">
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-authorization-and-endorseme" class="section-name selfRef">Authorization and Endorsement</a>
       </h2>
-<p id="section-8-1">Some profiles require that an issuer be authorized by a third party: a state authorizing use of a protective emblem under IHL, a national plant protection organization authorizing a pallet producer to apply the ISPM 15 mark, a treaty secretariat recognizing a designated site.
+<p id="section-8-1">Some profiles require issuer authorization by a third party: a state authorizing use of a protective emblem under IHL, a national plant protection organization authorizing a pallet producer to apply the ISPM 15 mark, a treaty secretariat recognizing a designated site.
 DNSSEC proves who published an emblem, not who authorized it.
 Endorsement fills that gap.<a href="#section-8-1" class="pilcrow">¶</a></p>
 <p id="section-8-2">An endorsement is an RRset in the authorizing entity's own DNSSEC-signed zone.
@@ -1820,6 +1897,9 @@ Authorization that passes through several levels (a state authorizing a ministry
 <p id="section-8-7">An authorizing entity that also wants its endorsements to be publicly auditable (so that issuing a secret endorsement is detectable) can log them in a transparency log as an addition; a profile can require this without the architecture depending on it.<a href="#section-8-7" class="pilcrow">¶</a></p>
 <p id="section-8-8">A profile states whether it requires endorsement, which authorizing entities it recognizes and how validators learn of them, and whether queried endorsements, stapled endorsements, or both are acceptable.
 Because each authorizing entity's trust is anchored in a zone it controls, no global registry of authorities is needed.<a href="#section-8-8" class="pilcrow">¶</a></p>
+<p id="section-8-9">An issuer may hold endorsements from several authorizing entities, and an emblem may carry or refer to several.
+Unless its profile is stricter, a validator accepts any one endorsement from an authorizing entity it recognizes whose scope covers the emblem, and ignores the others.
+The authorizing entities need not recognize one another: where two states each regard themselves as competent for the same medical facility, each can endorse it, and a validator acting under either state's authority finds the endorsement it recognizes.<a href="#section-8-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="confidentiality">
@@ -1833,24 +1913,30 @@ Because each authorizing entity's trust is anchored in a zone it controls, no gl
 An encrypted value is a COSE <span>[<a href="#RFC9052" class="cite xref">RFC9052</a>]</span> encryption structure (COSE_Encrypt0 for a single recipient, COSE_Encrypt with recipient structures where several parties, such as origin and destination customs, need access), with keys distributed as the profile specifies (for example, using HPKE <span>[<a href="#RFC9180" class="cite xref">RFC9180</a>]</span> <span>[<a href="#I-D.ietf-cose-hpke" class="cite xref">I-D.ietf-cose-hpke</a>]</span> to a public key that a customs authority publishes in its own zone).
 DNSSEC signs the ciphertext, so integrity covers restricted fields even for validators that cannot read them.
 This resolves an open question from the -00 draft (how encrypted subrecords participate in integrity protection): the signature covers what is published, which is the ciphertext.<a href="#section-9-2" class="pilcrow">¶</a></p>
-<p id="section-9-3">The alternative of authenticated DNS views, in which the server authenticates the client and returns different data to different audiences, is not recommended as the general mechanism:<a href="#section-9-3" class="pilcrow">¶</a></p>
+<p id="section-9-3">This is how the architecture provides validator authorization: a validator that holds a recipient's private key can read the value, and no other can, whichever server or cache it obtained the record from.
+Recipients are therefore parties whose roles a profile names in advance (origin and destination customs, a receiving state, an operations center), each publishing its public key in its own zone, not arbitrary validators.
+How to reach a recipient that was not foreseen when the emblem was issued (the customs authority of a country to which a shipment is diverted, for example) is an open issue (<a href="#open-issues" class="auto internal xref">Section 18</a>).
+Each ciphertext is bound to its emblem and map key (for example, as COSE external additional authenticated data), so that it cannot be moved into another emblem or field.
+A profile may also require that an encrypted value be accompanied by a salted digest of its plaintext, visible to all, so that a recipient can later prove to a third party what the issuer published; the salt, disclosed only with the plaintext, keeps values with few possibilities from being guessed.<a href="#section-9-3" class="pilcrow">¶</a></p>
+<p id="section-9-4">Authenticated DNS views, in which the server authenticates the client and returns different data to different audiences, are an alternative that this document does not recommend as the general mechanism:<a href="#section-9-4" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-9-4.1">
-          <p id="section-9-4.1.1">It identifies validators to issuers' servers, which is unacceptable where inspection patterns are sensitive (and fatal to undetectable validation).<a href="#section-9-4.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-9-5.1">
+          <p id="section-9-5.1.1">They identify validators to issuers' servers, which is unacceptable where inspection patterns are sensitive (and fatal to undetectable validation).<a href="#section-9-5.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-9-4.2">
-          <p id="section-9-4.2.1">Answers that differ per client cannot be shared through resolver caches, so the restricted tier becomes an application API with DNS framing.<a href="#section-9-4.2.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-9-5.2">
+          <p id="section-9-5.2.1">Answers that differ per client cannot be shared through resolver caches, so the restricted tier would become an application API with DNS framing.
+Encryption keeps every answer identical and cacheable, whether or not emblem names are delegated to a separate server (<a href="#discovery" class="auto internal xref">Section 5</a>).<a href="#section-9-5.2.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-9-4.3">
-          <p id="section-9-4.3.1">Standardizing mandatory client identification for DNS lookups creates a precedent that could be misused well beyond DIEM.<a href="#section-9-4.3.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-9-5.3">
+          <p id="section-9-5.3.1">Requiring client identification for emblem lookups in general would set a precedent for identified DNS lookups that could be misused well beyond DIEM.<a href="#section-9-5.3.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-9-5">Profiles may still use authenticated access where audit of who looked is itself a requirement, but should do so knowingly.<a href="#section-9-5" class="pilcrow">¶</a></p>
-<p id="section-9-6">Confidentiality also covers existence.
+<p id="section-9-6">Profiles may still use authenticated access where audit of who looked is itself a requirement, but should do so knowingly.<a href="#section-9-6" class="pilcrow">¶</a></p>
+<p id="section-9-7">Confidentiality also covers existence.
 Where the mere existence of an emblem name is sensitive, issuers use unguessable labels and a denial-of-existence method that does not reveal them.
 Plain NSEC allows zone walking and would expose such labels.
 Compact denial of existence <span>[<a href="#RFC9824" class="cite xref">RFC9824</a>]</span> reveals nothing but requires online signing, and its distinct signal for nonexistent names requires signer support that is not yet common in deployed authoritative servers; offline-signed zones can use NSEC3 <span>[<a href="#RFC9276" class="cite xref">RFC9276</a>]</span>, whose hashed names resist enumeration when the labels themselves have high entropy.
-NSEC3 still reveals, through its type bitmaps, how many names in the zone hold emblem records, though not which names they are; issuers for whom that count is sensitive should use compact denial or add decoy names.<a href="#section-9-6" class="pilcrow">¶</a></p>
+NSEC3 still reveals, through its type bitmaps, how many names in the zone hold emblem records, though not which names they are; issuers for whom that count is sensitive should use compact denial or add decoy names.<a href="#section-9-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="offline">
@@ -1864,11 +1950,15 @@ DNSSEC data is self-authenticating: an RRset, its RRSIG, and the chain of DNSKEY
 A bundle carrying the full chain from the root runs from one to a few kilobytes, so it fits in a large QR code or an accompanying document, and can be validated at a disconnected port or in the field.
 Smaller carriers, such as common NFC tags of under a kilobyte, generally need a validator that already holds a trust anchor closer to the issuer (for its sector, or for the issuer's own zone), so that the bundle can omit the upper part of the chain.
 Signature algorithm choice matters here: newer algorithms, such as those based on elliptic curves, have much smaller keys and signatures than RSA (see <span>[<a href="#RFC8624" class="cite xref">RFC8624</a>]</span> for current guidance), so issuers that expect their emblems to travel in bundles should prefer them.
-Bundle sizes will need revisiting as post-quantum algorithms, whose signatures are generally larger, come into use for DNSSEC.
-Its validity is bounded by the shortest RRSIG validity period it contains, which also bounds how long a removed emblem can be replayed.
+Post-quantum algorithms, whose keys and signatures are much larger, would make chains many times larger as they come into use for DNSSEC, which makes placing trust anchors close to issuers matter even more.<a href="#section-10-2" class="pilcrow">¶</a></p>
+<p id="section-10-3">A bundle's validity is bounded by the shortest RRSIG validity period it contains, which also bounds how long a removed emblem can be replayed.
 That includes the signatures of the root and TLD zones, which the issuer does not control and which typically last one to three weeks, so bundles have a limited shelf life and must be refreshed for long journeys.
-An offline validator also needs a trustworthy clock, since a validator whose clock can be set back will accept expired signatures.<a href="#section-10-2" class="pilcrow">¶</a></p>
-<p id="section-10-3">Offline bundles take over the role that application-layer signed objects (such as signed CBOR) played in earlier thinking, without introducing a second signature system.<a href="#section-10-3" class="pilcrow">¶</a></p>
+A validator that already holds a current copy of the upper chain (refreshed whenever it is online) can prefer it to the copy in the bundle, so that only the part of the chain below its own trust anchor needs to be current.
+How best to validate offline over periods longer than the upper zones' signature lifetimes is an open issue (<a href="#open-issues" class="auto internal xref">Section 18</a>).<a href="#section-10-3" class="pilcrow">¶</a></p>
+<p id="section-10-4">An offline validator needs a roughly correct clock.
+Signature validity periods run from days to weeks, so a clock that is right to within a day or so suffices, but a validator whose clock can be set back will accept expired signatures.
+A validator with no clock at all can still conclude that the data was validly signed at some time within the signatures' validity periods, which a profile may accept as evidence but not as proof that the emblem is current.<a href="#section-10-4" class="pilcrow">¶</a></p>
+<p id="section-10-5">Offline bundles take over the role that application-layer signed objects (such as signed CBOR) played in earlier thinking, without introducing a second signature system.<a href="#section-10-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="lifecycle">
@@ -1883,7 +1973,9 @@ An offline validator also needs a trustworthy clock, since a validator whose clo
 Removing the records stops new validators from finding them, but signed copies remain valid until their RRSIGs expire, and caches may hold them until their TTLs expire.
 Profiles that need prompt removal should use short signature validity periods and TTLs, which in practice means online signing, and which limits the shelf life of offline bundles accordingly.
 An emblem's own validity period is a different thing: it bounds the issuer's statement, while signature lifetimes bound how long a copy can be replayed, and only the latter governs removal.
-Profiles should also be candid in their threat models that the DNS is not forgetful: passive DNS collectors may retain records indefinitely, which matters for the "learn after the fact" aspect of removability.<a href="#section-11-1.2.1" class="pilcrow">¶</a></p>
+Profiles should also be candid in their threat models that the DNS is not forgetful: passive DNS collectors may retain records indefinitely, which matters for the "learn after the fact" aspect of removability.
+For an online validator, the query is itself the status check: authenticated denial of existence proves that an emblem has been removed, with no separate revocation mechanism.
+Offline validators cannot make that check, and how they should learn of revocations is an open issue (<a href="#open-issues" class="auto internal xref">Section 18</a>).<a href="#section-11-1.2.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-11-1.3">Archival:</dt>
@@ -1929,7 +2021,8 @@ Neither hides the query from the issuer's own authoritative server.<a href="#sec
         <li class="normal" id="section-12-2.5">
           <p id="section-12-2.5.1">Query indistinguishability: if the query that retrieves an emblem is one that ordinary clients make anyway, retrieving the emblem reveals nothing.
 For a network service, the emblem can travel in a record that clients already request when connecting, such as the asset's HTTPS record <span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>.
-Techniques of this kind place emblem data in the asset's own zone, so they cannot be combined with delegating emblems to a separate server through a zone cut, and they should not require changes to recursive resolvers, which would delay deployment.<a href="#section-12-2.5.1" class="pilcrow">¶</a></p>
+Techniques of this kind place emblem data in the asset's own zone, so they cannot be combined with delegating emblems to a separate server, and they should not require changes to recursive resolvers, which would delay deployment.
+How best to hide the act of validation is an open issue (<a href="#open-issues" class="auto internal xref">Section 18</a>).<a href="#section-12-2.5.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-12-3">This document recommends a baseline that works with today's DNS: validators query through large shared resolvers that do not send client subnet information, over encrypted transports, and issuers publish self-contained emblems with stapled endorsements and TTLs long enough for caching to be effective.
@@ -1948,32 +2041,32 @@ A profile specifies:<a href="#section-13-1" class="pilcrow">¶</a></p>
 <span class="break"></span><dl class="dlParallel" id="section-13-2">
         <dt id="section-13-2.1">Data:</dt>
         <dd style="margin-left: 1.5em" id="section-13-2.2">
-          <p id="section-13-2.2.1">Its keys, each with a type (preferably in CDDL), and which are required, which are critical, and which are confidential; and which common keys and code lists it reuses.<a href="#section-13-2.2.1" class="pilcrow">¶</a></p>
+          <p id="section-13-2.2.1">Its map keys, each with a type (preferably in CDDL), and which are required, which are critical, and which are confidential; for numeric values, whether each is an exact decimal or floating point; and which common map keys and code lists it reuses.<a href="#section-13-2.2.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-13-2.3">Layout:</dt>
         <dd style="margin-left: 1.5em" id="section-13-2.4">
-          <p id="section-13-2.4.1">How its data divides into facets, which facets are static and which dynamic, and the expected TTLs and signing arrangements for each (<a href="#facets" class="auto internal xref">Section 6.6</a>).<a href="#section-13-2.4.1" class="pilcrow">¶</a></p>
+          <p id="section-13-2.4.1">How its data divides into facets, which facets are static and which dynamic, which are required for which purposes, and the expected TTLs and signing arrangements for each (<a href="#facets" class="auto internal xref">Section 6.7</a>).<a href="#section-13-2.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-13-2.5">Naming and discovery:</dt>
         <dd style="margin-left: 1.5em" id="section-13-2.6">
-          <p id="section-13-2.6.1">How validators learn emblem names for its assets, whether names are derived from the asset's name, conveyed out of band, or deliberately unguessable, and how the <code>asset</code> key relates to the emblem name (<a href="#discovery" class="auto internal xref">Section 5</a>).<a href="#section-13-2.6.1" class="pilcrow">¶</a></p>
+          <p id="section-13-2.6.1">How validators learn emblem names for its assets, whether names are derived from the asset's name, conveyed out of band, or deliberately unguessable, and how the <code>asset</code> map key relates to the emblem name (<a href="#discovery" class="auto internal xref">Section 5</a>).<a href="#section-13-2.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-13-2.7">Hierarchy:</dt>
         <dd style="margin-left: 1.5em" id="section-13-2.8">
-          <p id="section-13-2.8.1">Whether its emblems refer to emblems of other issuers or profiles, and whether references carry digests (<a href="#hierarchy" class="auto internal xref">Section 7</a>).<a href="#section-13-2.8.1" class="pilcrow">¶</a></p>
+          <p id="section-13-2.8.1">Whether its emblems refer to emblems of other issuers or profiles, and whether references carry digests, optionally or always (<a href="#hierarchy" class="auto internal xref">Section 7</a>).<a href="#section-13-2.8.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-13-2.9">Authorization:</dt>
+<dt id="section-13-2.9">Issuer authorization:</dt>
         <dd style="margin-left: 1.5em" id="section-13-2.10">
-          <p id="section-13-2.10.1">Whether endorsement is required, which authorizing entities it recognizes and how validators learn of them, how endorsements are named, how an endorsement's scope is judged to cover an emblem, and whether queried or stapled endorsements are acceptable (<a href="#endorsement" class="auto internal xref">Section 8</a>).<a href="#section-13-2.10.1" class="pilcrow">¶</a></p>
+          <p id="section-13-2.10.1">Whether endorsement is required, which authorizing entities it recognizes and how validators learn of them, how endorsements are named, how an endorsement's scope is judged to cover an emblem, whether queried or stapled endorsements are acceptable, and any rule stricter than "any recognized endorsement suffices" (<a href="#endorsement" class="auto internal xref">Section 8</a>).<a href="#section-13-2.10.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-13-2.11">Confidentiality:</dt>
+<dt id="section-13-2.11">Confidentiality and validator authorization:</dt>
         <dd style="margin-left: 1.5em" id="section-13-2.12">
-          <p id="section-13-2.12.1">Which values are encrypted, to whom, and how recipients' keys are found (<a href="#confidentiality" class="auto internal xref">Section 9</a>).<a href="#section-13-2.12.1" class="pilcrow">¶</a></p>
+          <p id="section-13-2.12.1">Which values are encrypted, to which recipient roles, how recipients' keys are found, and whether salted plaintext digests are required (<a href="#confidentiality" class="auto internal xref">Section 9</a>).<a href="#section-13-2.12.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-13-2.13">Lifecycle:</dt>
@@ -1988,7 +2081,7 @@ A profile specifies:<a href="#section-13-1" class="pilcrow">¶</a></p>
         <dd class="break"></dd>
 <dt id="section-13-2.17">Interpretation:</dt>
         <dd style="margin-left: 1.5em" id="section-13-2.18">
-          <p id="section-13-2.18.1">The treatments it may request (<a href="#treatment" class="auto internal xref">Section 6.3</a>), the citation schemes it expects for their legal basis, what a validated emblem means for a validator acting under the profile's normative framework, and what a validator should do when an expected emblem is absent or fails validation.<a href="#section-13-2.18.1" class="pilcrow">¶</a></p>
+          <p id="section-13-2.18.1">The treatments it may request (<a href="#treatment" class="auto internal xref">Section 6.4</a>), the citation schemes it expects for their legal basis, what a validated emblem means for a validator acting under the profile's normative framework, and what a validator should do when an expected emblem is absent or fails validation.<a href="#section-13-2.18.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
 </dl>
@@ -2014,7 +2107,7 @@ In outline, a validator:<a href="#section-14-1" class="pilcrow">¶</a></p>
           <p id="section-14-2.3.1">validates them with DNSSEC, treating bogus data as absent and, unless the profile permits unvalidated emblems, treating unsigned data as absent;<a href="#section-14-2.3.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-14-2.4">
-          <p id="section-14-2.4.1">identifies the profile, checks each value against its key's type, and rejects the emblem if it contains a critical key the validator does not understand;<a href="#section-14-2.4.1" class="pilcrow">¶</a></p>
+          <p id="section-14-2.4.1">selects the records whose profiles it understands, checks each value against its map key's type, and rejects a record if it contains a critical map key the validator does not understand;<a href="#section-14-2.4.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-14-2.5">
           <p id="section-14-2.5.1">checks that the emblem identifies the asset in front of it, by FQDN and by whatever cross-check identifiers the profile defines;<a href="#section-14-2.5.1" class="pilcrow">¶</a></p>
@@ -2023,7 +2116,7 @@ In outline, a validator:<a href="#section-14-1" class="pilcrow">¶</a></p>
           <p id="section-14-2.6.1">checks validity periods;<a href="#section-14-2.6.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-14-2.7">
-          <p id="section-14-2.7.1">where the profile requires authorization, validates the endorsement (queried or stapled) and checks that its scope covers the emblem;<a href="#section-14-2.7.1" class="pilcrow">¶</a></p>
+          <p id="section-14-2.7.1">where the profile requires issuer authorization, validates an endorsement (queried, stapled, or carried in an offline bundle, so this step works offline too) and checks that its scope covers the emblem;<a href="#section-14-2.7.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-14-2.8">
           <p id="section-14-2.8.1">follows references to other emblems as far as its task requires, checking digests where present;<a href="#section-14-2.8.1" class="pilcrow">¶</a></p>
@@ -2035,8 +2128,15 @@ In outline, a validator:<a href="#section-14-1" class="pilcrow">¶</a></p>
           <p id="section-14-2.10.1">interprets the result under the profile, optionally retaining the validated responses as evidence (<a href="#lifecycle" class="auto internal xref">Section 11</a>).<a href="#section-14-2.10.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
-<p id="section-14-3">The steps are common to all profiles, but some of their inputs come from the profile: its keys and types (step 4), how its emblems identify their assets (step 5), and, where it requires authorization, which authorizing entities it recognizes, how their endorsements are named, and how an endorsement's scope is judged to cover an emblem (step 7).
-These are data that a validator can load, listed in the profile template (<a href="#profiles" class="auto internal xref">Section 13</a>), rather than code.<a href="#section-14-3" class="pilcrow">¶</a></p>
+<p id="section-14-3">The result is valid, invalid, or indeterminate.
+Indeterminate means that something the profile requires for the validator's purpose could not be obtained or read: a required facet that timed out or is missing from a bundle, or a value the validator cannot decrypt (<a href="#facets" class="auto internal xref">Section 6.7</a>).
+A validator must not present an indeterminate result as invalid.<a href="#section-14-3" class="pilcrow">¶</a></p>
+<p id="section-14-4">The steps are common to all profiles, but some of their inputs come from the profile: its map keys and types (step 4), how its emblems identify their assets (step 5), and, where it requires issuer authorization, which authorizing entities it recognizes, how their endorsements are named, and how an endorsement's scope is judged to cover an emblem (step 7).
+These are data that a validator can load, listed in the profile template (<a href="#profiles" class="auto internal xref">Section 13</a>), rather than code.<a href="#section-14-4" class="pilcrow">¶</a></p>
+<p id="section-14-5">A validator that combines several records (following references, or decrypting one value and then checking another) should evaluate them all at one time.
+Signatures can expire between queries, and a resolver's AD bit is a judgment made once that cannot be re-examined later.
+A validator that needs consistency, or evidence it can show to others, therefore collects the RRsets with their RRSIGs and chains (in the bundle format of <a href="#offline" class="auto internal xref">Section 10</a>) and validates them itself at a single evaluation time.
+This is ordinary DNSSEC validation in a validating stub or library, and needs no special resolver; the collected data is also the record that supports proof of presence (<a href="#lifecycle" class="auto internal xref">Section 11</a>).<a href="#section-14-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="reqs-map">
@@ -2059,11 +2159,11 @@ These are data that a validator can load, listed in the profile template (<a hre
         <tbody>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">Digital emblem format</td>
-            <td class="text-left" rowspan="1" colspan="1">A typed dictionary that identifies the marked asset by FQDN and names its profile, with a small set of common keys (<a href="#data-model" class="auto internal xref">Section 6</a>, <a href="#strawman" class="auto internal xref">Section 16</a>)</td>
+            <td class="text-left" rowspan="1" colspan="1">A typed dictionary that identifies the marked asset by FQDN and names its profile, with a small set of common map keys; one record per profile where an asset falls under several (<a href="#data-model" class="auto internal xref">Section 6</a>, <a href="#strawman" class="auto internal xref">Section 16</a>)</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">Emblem semantics</td>
-            <td class="text-left" rowspan="1" colspan="1">Defined by each profile (<a href="#profiles" class="auto internal xref">Section 13</a>); requested treatments are expressed uniformly, with an open legal basis (<a href="#treatment" class="auto internal xref">Section 6.3</a>)</td>
+            <td class="text-left" rowspan="1" colspan="1">Defined by each profile (<a href="#profiles" class="auto internal xref">Section 13</a>); requested treatments are expressed uniformly, with an open legal basis (<a href="#treatment" class="auto internal xref">Section 6.4</a>)</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">Discovery</td>
@@ -2075,27 +2175,27 @@ These are data that a validator can load, listed in the profile template (<a hre
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">Removable</td>
-            <td class="text-left" rowspan="1" colspan="1">Record removal, bounded by signature lifetimes and caching (<a href="#lifecycle" class="auto internal xref">Section 11</a>)</td>
+            <td class="text-left" rowspan="1" colspan="1">Record removal, bounded by signature lifetimes and caching; for online validators, authenticated denial is the status check (<a href="#lifecycle" class="auto internal xref">Section 11</a>)</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">Undetectable validation</td>
-            <td class="text-left" rowspan="1" colspan="1">Resolver mediation, caching, self-contained answers, and query indistinguishability (<a href="#undetectable" class="auto internal xref">Section 12</a>)</td>
+            <td class="text-left" rowspan="1" colspan="1">Resolver mediation, caching, and self-contained answers; hiding the act of validation is open (<a href="#undetectable" class="auto internal xref">Section 12</a>)</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">Validation</td>
-            <td class="text-left" rowspan="1" colspan="1">DNSSEC, in a common procedure (<a href="#validation" class="auto internal xref">Section 14</a>); facets let a profile validate all data or a subset, with dynamic data signed separately (<a href="#facets" class="auto internal xref">Section 6.6</a>). Profiles may permit unvalidated emblems</td>
+            <td class="text-left" rowspan="1" colspan="1">DNSSEC, in a common procedure (<a href="#validation" class="auto internal xref">Section 14</a>); facets let a profile validate all data or a subset, with dynamic data signed separately (<a href="#facets" class="auto internal xref">Section 6.7</a>). Profiles may permit unvalidated emblems</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">Authorization</td>
-            <td class="text-left" rowspan="1" colspan="1">Endorsements published in the authorizing entity's zone, queried or stapled; key compromise is handled by DNSSEC key rollover, optional key binding in endorsements, and short signature lifetimes on stapled endorsements (<a href="#endorsement" class="auto internal xref">Section 8</a>). No Internet access is assumed (<a href="#offline" class="auto internal xref">Section 10</a>)</td>
+            <td class="text-left" rowspan="1" colspan="1">Issuer authorization by endorsements published in the authorizing entity's zone, queried or stapled, from one or several authorizing entities; key compromise is handled by DNSSEC key rollover, optional key binding in endorsements, and short signature lifetimes on stapled endorsements (<a href="#endorsement" class="auto internal xref">Section 8</a>). No Internet access is assumed (<a href="#offline" class="auto internal xref">Section 10</a>)</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">Extensibility</td>
-            <td class="text-left" rowspan="1" colspan="1">New profiles and keys without protocol changes; critical keys protect validators from misreading (<a href="#data-model" class="auto internal xref">Section 6</a>)</td>
+            <td class="text-left" rowspan="1" colspan="1">New profiles and map keys without protocol changes; validators skip what they do not understand, and critical map keys protect them from misreading (<a href="#data-model" class="auto internal xref">Section 6</a>)</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">Data formats</td>
-            <td class="text-left" rowspan="1" colspan="1">Value types, with external code lists as types (<a href="#code-lists" class="auto internal xref">Section 6.5</a>)</td>
+            <td class="text-left" rowspan="1" colspan="1">Value types, with external code lists as types (<a href="#code-lists" class="auto internal xref">Section 6.6</a>)</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">Asset identifier discovery, implicit discovery</td>
@@ -2103,7 +2203,7 @@ These are data that a validator can load, listed in the profile template (<a hre
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">Confidentiality</td>
-            <td class="text-left" rowspan="1" colspan="1">Encrypted values in signed records; enumeration-resistant names (<a href="#confidentiality" class="auto internal xref">Section 9</a>)</td>
+            <td class="text-left" rowspan="1" colspan="1">Encrypted values in signed records, readable by recipients the profile names (validator authorization); enumeration-resistant names (<a href="#confidentiality" class="auto internal xref">Section 9</a>)</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">Proof of presence</td>
@@ -2132,24 +2232,24 @@ It sketches one way to realize the architecture so that the working group can ev
 Deterministic encoding fixes the serialization but not application-level equivalence, so the encoding must also fix canonical forms (for example, decimal mantissas without trailing zeros, integer epoch seconds) for equal emblems to have equal wire representations.<a href="#section-16.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-16.1-2.2">
-            <p id="section-16.1-2.2.1">Map keys are small integers from a "DIEM Emblem Keys" registry (common keys) or from the key space of the profile named in the map.
-Text names are used in this document for readability, for enumerated values as well as for keys.<a href="#section-16.1-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-16.1-2.2.1">Map keys are small integers from a "DIEM Emblem Keys" registry (common map keys) or from the map key space of the profile named in the map.
+Text names are used in this document for readability, for enumerated values as well as for map keys.<a href="#section-16.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-16.1-2.3">
-            <p id="section-16.1-2.3.1">Key 1, "profile", is required.<a href="#section-16.1-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-16.1-2.3.1">Map key 1, "profile", is required.<a href="#section-16.1-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-16.1-2.4">
             <p id="section-16.1-2.4.1">Enumerated values (profile identifiers, treatment actions, purposes, and the like) are small integers from registries; codes from external code lists are carried verbatim as text.<a href="#section-16.1-2.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-16.1-2.5">
-            <p id="section-16.1-2.5.1">Decimal values use CBOR tag 4 (decimal fraction); timestamps use tag 1; language-tagged text uses tag 38; URIs use tag 32; encrypted values are COSE_Encrypt0 (tag 16) or COSE_Encrypt (tag 96); a value that exists but is unknown to the issuer is the CBOR simple value undefined.<a href="#section-16.1-2.5.1" class="pilcrow">¶</a></p>
+            <p id="section-16.1-2.5.1">Exact decimal values use CBOR tag 4 (decimal fraction) and floating-point values use CBOR floats, as each map key's definition specifies; timestamps use tag 1; language-tagged text uses tag 38; URIs use tag 32; encrypted values are COSE_Encrypt0 (tag 16) or COSE_Encrypt (tag 96); a value that exists but is unknown to the issuer is the CBOR simple value undefined.<a href="#section-16.1-2.5.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-16.1-2.6">
             <p id="section-16.1-2.6.1">RDATA contains no compressible domain names, so the type is compatible with unknown-type handling <span>[<a href="#RFC3597" class="cite xref">RFC3597</a>]</span>.
-Domain-name references are carried as text, normalized for comparison and digests (A-labels, lowercase, without a trailing dot).<a href="#section-16.1-2.6.1" class="pilcrow">¶</a></p>
+Domain-name references are carried as text, normalized for comparison and digests (A-labels, lowercase, without a trailing dot); a reference within the same issuer may be relative to the issuer's emblem zone (<a href="#hierarchy" class="auto internal xref">Section 7</a>).<a href="#section-16.1-2.6.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-16.1-2.7">
-            <p id="section-16.1-2.7.1">The presentation format would be the generic <code>\# length hex</code> form of <span>[<a href="#RFC3597" class="cite xref">RFC3597</a>]</span>, with CBOR diagnostic notation for human display.<a href="#section-16.1-2.7.1" class="pilcrow">¶</a></p>
+            <p id="section-16.1-2.7.1">The presentation format would be the generic <code>\# length hex</code> form of <span>[<a href="#RFC3597" class="cite xref">RFC3597</a>]</span>, with CBOR diagnostic notation for human display; <a href="#encoded" class="auto internal xref">Appendix A</a> shows one record both ways.<a href="#section-16.1-2.7.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-16.1-3">Why a CBOR map rather than SVCB-style key/value parameters <span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>?
@@ -2157,12 +2257,12 @@ Both preserve the dictionary model.
 CBOR brings typed values, nesting, decimal fractions, language tags, and COSE encryption without new definitions.
 The cost is that zone-file tooling would need a CBOR-aware presentation format to be friendly.<a href="#section-16.1-3" class="pilcrow">¶</a></p>
 <p id="section-16.1-4">Why not one opaque blob per asset?
-Because DNSSEC signs per RRset, packing everything into one record forfeits independent retrieval, independent TTLs, and the static/dynamic split of <a href="#facets" class="auto internal xref">Section 6.6</a>.
+Because DNSSEC signs per RRset, packing everything into one record forfeits independent retrieval, independent TTLs, and the static/dynamic split of <a href="#facets" class="auto internal xref">Section 6.7</a>.
 Profiles should split emblems into facets along the lines that validators actually query.<a href="#section-16.1-4" class="pilcrow">¶</a></p>
 <p id="section-16.1-5">Size needs attention at two levels.
-Individual records vary: item-level emblems like those below are well under 100 octets and class-level ones a few hundred, while a consignment emblem with transport references and several encrypted fields approaches the 1,232-octet limit commonly used for DNS over UDP, and an emblem with a stapled endorsement chain exceeds it and arrives over TCP or an encrypted transport.
+Individual records vary: item-level emblems like those below are well under 100 octets and class-level ones around a hundred, while a consignment emblem with transport references and fields encrypted to two customs authorities, or an emblem with a stapled endorsement chain, exceeds the 1,232-octet limit commonly used for DNS over UDP and arrives over TCP or an encrypted transport.
 Aggregates matter more: a consignment of 1,400 devices implies 1,400 item emblems, and validators should not have to fetch them all.
-Class-level data is published once, consignments refer to items by digest rather than listing them, and validators sample individual items or use an offline bundle prepared for the consignment.<a href="#section-16.1-5" class="pilcrow">¶</a></p>
+Class-level data is published once, consignments list classes with counts rather than items, and validators sample individual items or use an offline bundle prepared for the consignment.<a href="#section-16.1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="companion-rrtypes">
@@ -2172,7 +2272,7 @@ Class-level data is published once, consignments refer to items by digest rather
         </h3>
 <p id="section-16.2-1">Existing RRTypes serve some facets directly: LOC <span>[<a href="#RFC1876" class="cite xref">RFC1876</a>]</span> for point positions, URI <span>[<a href="#RFC7553" class="cite xref">RFC7553</a>]</span> for references to documentation, TLSA <span>[<a href="#RFC6698" class="cite xref">RFC6698</a>]</span> where an emblem is bound to a TLS service.
 A separate RRType for typed quantities could serve profiles that query quantities independently.<a href="#section-16.2-1" class="pilcrow">¶</a></p>
-<p id="section-16.2-2">New types would be needed for endorsements (ENDORSE, whose RDATA could reuse the EMBLEM encoding with a key space of its own: the endorsed issuer in place of the asset, the endorsed profile, scope, validity, and optional key and visual mark digests) and possibly for areas (polygons), which LOC does not express.
+<p id="section-16.2-2">New types would be needed for endorsements (ENDORSE, whose RDATA could reuse the EMBLEM encoding with a map key space of its own: the endorsed issuer in place of the asset, the endorsed profile, scope, validity, and optional key and visual mark digests) and possibly for areas (polygons), which LOC does not express.
 A stapled endorsement would be carried in an emblem as a byte string holding the serialized RRsets and chain, in the format of <span>[<a href="#RFC9102" class="cite xref">RFC9102</a>]</span>.
 All of these, like EMBLEM, need only Expert Review for allocation <span>[<a href="#RFC6895" class="cite xref">RFC6895</a>]</span>.<a href="#section-16.2-2" class="pilcrow">¶</a></p>
 </section>
@@ -2185,8 +2285,8 @@ All of these, like EMBLEM, need only Expert Review for allocation <span>[<a href
 <a href="#section-17" class="section-number selfRef">17. </a><a href="#name-example-use-cases" class="section-name selfRef">Example Use Cases</a>
       </h2>
 <p id="section-17-1">The following examples are sketches.
-Names, keys, and values are illustrative.
-Emblem dictionaries are shown in CBOR diagnostic notation with text keys and text enumerated values (both of which would be integers in an encoding, <a href="#strawman" class="auto internal xref">Section 16</a>), using the elision <code>...</code> of <span>[<a href="#I-D.ietf-cbor-edn-literals" class="cite xref">I-D.ietf-cbor-edn-literals</a>]</span> for long values.
+Names, map keys, and values are illustrative.
+Emblem dictionaries are shown in CBOR diagnostic notation with text map keys and text enumerated values (both of which would be integers in an encoding, <a href="#strawman" class="auto internal xref">Section 16</a>), using the elision <code>...</code> of <span>[<a href="#I-D.ietf-cbor-edn-literals" class="cite xref">I-D.ietf-cbor-edn-literals</a>]</span> for long values.
 Country codes beginning with "X" are user-assigned placeholders.<a href="#section-17-1" class="pilcrow">¶</a></p>
 <div id="ex-ihl">
 <section id="section-17.1">
@@ -2208,8 +2308,9 @@ Because validators must not reveal their interest, the hospital staples the endo
 <dt id="section-17.1-2.3">Placement:</dt>
           <dd style="margin-left: 1.5em" id="section-17.1-2.4">
             <p id="section-17.1-2.4.1">The asset is a network service, so its name is already known to anyone who would interact with it.
-The hospital may publish under its <code>_diem</code> cut, at <code>records._diem.hospital.example</code> (delegated to a provider that serves emblems, with the profile deriving the emblem name from the service's name), or use one of the query-indistinguishability techniques of <a href="#undetectable" class="auto internal xref">Section 12</a> at the service's own name, as its profile's threat model dictates.
-Either way, the <code>asset</code> key names the service itself, <code>records.hospital.example</code>, not the emblem name.<a href="#section-17.1-2.4.1" class="pilcrow">¶</a></p>
+The hospital may publish under its delegated <code>_diem</code> zone, at <code>records._diem.hospital.example</code> (served by a provider that serves emblems, with the profile deriving the emblem name from the service's name), or use one of the query-indistinguishability techniques of <a href="#undetectable" class="auto internal xref">Section 12</a> at the service's own name, as its profile's threat model dictates.
+Either way, the <code>asset</code> map key names the service itself, <code>records.hospital.example</code>, not the emblem name.
+The emblem's subject is the records service, not the host it runs on or the patient data it holds (<a href="#subject" class="auto internal xref">Section 5.1</a>).<a href="#section-17.1-2.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
@@ -2227,10 +2328,10 @@ Either way, the <code>asset</code> key names the service itself, <code>records.h
   "valid":   [1(1793491200), 1(1801440000)],
   "issuer-name": 38(["en", "Example General Hospital"]),
   "mark":    "_mark.records._diem.hospital.example",
-  "endorsement": {                / stapled, from the ministry /
-    "by":     "health.gov.example",
-    "staple": h'...'   / ENDORSE RRset, RRSIGs, chain from root /
-  }
+  "endorsements": [               / stapled, from the ministry /
+    {"by":     "health.gov.example",
+     "staple": h'...'}  / ENDORSE RRset, RRSIGs, chain from root /
+  ]
 }
 
 / ENDORSE at 3q9v...._endorse.health.gov.example (stapled above) /
@@ -2278,14 +2379,17 @@ The stapled endorsement does not extend that window, because the emblem that car
         <h3 id="name-logistics-and-customs-a-pal">
 <a href="#section-17.2" class="section-number selfRef">17.2. </a><a href="#name-logistics-and-customs-a-pal" class="section-name selfRef">Logistics and Customs: A Pallet of Smartphones</a>
         </h3>
-<p id="section-17.2-1">A manufacturer ships 1,400 boxed smartphones on a wooden pallet.
+<p id="section-17.2-1">A manufacturer ships 1,400 boxed smartphones of one model family, in three variants, on a wooden pallet.
 A freight forwarder consolidates the pallet into a consignment.
 Customs at the destination, and eventually a recycler, need different subsets of the data.<a href="#section-17.2-1" class="pilcrow">¶</a></p>
-<p id="section-17.2-2">The manufacturer's zone holds class-level and item-level data:<a href="#section-17.2-2" class="pilcrow">¶</a></p>
+<p id="section-17.2-2">The manufacturer's zone holds data for the model family, for each variant, and for each item:<a href="#section-17.2-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-17.2-3">
 <pre>
-x1.models._diem.maker.example.              EMBLEM  (class: model X1)
-sn-35791a7c.x1.models._diem.maker.example.  EMBLEM  (one device)
+x1.models._diem.maker.example.       EMBLEM  (family: X1)
+std.x1.models._diem.maker.example.   EMBLEM  (variant: X1)
+pro.x1.models._diem.maker.example.   EMBLEM  (variant: X1 Pro)
+max.x1.models._diem.maker.example.   EMBLEM  (variant: X1 Max)
+sn-35791a7c._diem.maker.example.     EMBLEM  (one device)
 </pre><a href="#section-17.2-3" class="pilcrow">¶</a>
 </div>
 <div class="lang-cbor-diag sourcecode" id="section-17.2-4">
@@ -2294,40 +2398,43 @@ sn-35791a7c.x1.models._diem.maker.example.  EMBLEM  (one device)
 {
   "profile": "product-class",
   "asset":   "x1.models._diem.maker.example",
-  "gtin":    "00614141999996",
   "model":   "X1",
   "dangerous-goods": {
     "un-number": "3481",  / Li-ion batteries in equipment /
     "class":     "9"
   },
   "battery-chemistry": "li-ion",
-  "battery-energy": [4([-1, 185]), "WHR"],   / 18.5 watt-hours /
   "recycling": 32("https://maker.example/recycle/x1"),
   "origin":    "VN",
   "mid-us":    "VNEXAMAK123HAN",     / US manufacturer ID /
-  "radio-auth": {"fcc-id": "2AEXAX1"},
-  "components": [
-    {"part": "battery-cell",
-     "attestation": "cell.x1.supply._diem.maker.example",
-     "digest": h'5e1b...'},
-    {"part": "display",
-     "attestation": "disp.x1.supply._diem.maker.example",
-     "digest": h'c07a...'}
-  ]
+  "radio-auth": {"fcc-id": "2AEXAX1"}
 }
 
-/ EMBLEM at sn-35791a7c.x1.models._diem.maker.example /
+/ EMBLEM at pro.x1.models._diem.maker.example /
+{
+  "profile": "product-class",
+  "asset":   "pro.x1.models._diem.maker.example",
+  "class-ref": "x1.models",          / relative: same issuer /
+  "gtin":    "00614141999989",
+  "model":   "X1 Pro",
+  "battery-energy": [4([-1, 193]), "WHR"]   / 19.3 watt-hours /
+}
+
+/ EMBLEM at sn-35791a7c._diem.maker.example /
 {
   "profile": "product-item",
-  "asset":   "sn-35791a7c.x1.models._diem.maker.example",
+  "asset":   "sn-35791a7c._diem.maker.example",
+  "class-ref": "pro.x1.models",
   "serial":  "35791A7C",
   "made":    1(1790812800)
 }
 </pre><a href="#section-17.2-4" class="pilcrow">¶</a>
 </div>
-<p id="section-17.2-5">The hazardous materials, origin, and regulatory data is published once for the model, not 1,400 times.
-A validator holding a device's emblem name finds class data by removing the leftmost label.
-The manufacturer mirrors the attestations it holds for key components in its own zone, each with a digest of the original, so that a validator can trace components without contacting the component suppliers.<a href="#section-17.2-5" class="pilcrow">¶</a></p>
+<p id="section-17.2-5">The hazardous materials, origin, and regulatory data is published once for the model family, not 1,400 times.
+Each variant adds only what differs from the family (here its GTIN and its battery's energy, which affects dangerous goods handling); the X1 and X1 Max variants are like the X1 Pro, with 18.5 and 24.1 watt-hours.
+Variants are split only where validators act differently, so color, for example, does not warrant one.
+Each item emblem names its class explicitly, relative to the manufacturer's emblem zone, so a validator follows that reference rather than deriving the class from the item's name, and the reference cannot lead outside the manufacturer's zone.
+Supplier and component detail is commercially sensitive and invisible to consumers, so the manufacturer keeps it internal or, where a regulator needs it, publishes it encrypted to that regulator; a profile structures such data as its use case needs.<a href="#section-17.2-5" class="pilcrow">¶</a></p>
 <p id="section-17.2-6">The pallet carries the ISPM 15 mark <span>[<a href="#ISPM15" class="cite xref">ISPM15</a>]</span>, authorized by the national plant protection organization (NPPO) of the country where the mark was applied.
 The pallet producer publishes the mark's data, and the NPPO endorses the producer (a queried endorsement suffices here, since nobody needs to hide that they checked a pallet):<a href="#section-17.2-6" class="pilcrow">¶</a></p>
 <div class="lang-cbor-diag sourcecode" id="section-17.2-7">
@@ -2343,7 +2450,8 @@ The pallet producer publishes the mark's data, and the NPPO endorses the produce
 / ENDORSE at pallets.example._endorse.nppo.gov.example /
 </pre><a href="#section-17.2-7" class="pilcrow">¶</a>
 </div>
-<p id="section-17.2-8">The forwarder wraps everything in a consignment emblem at an unguessable name in its own zone (an NSEC3-signed zone, so the name cannot be enumerated), with live position in a shared online-signed zone:<a href="#section-17.2-8" class="pilcrow">¶</a></p>
+<p id="section-17.2-8">The consignment is an emblem subject in its own right, because it is what customs acts on: it is declared, examined, and released as a unit, whatever it contains.
+The forwarder wraps everything in a consignment emblem at an unguessable name in its own zone (an NSEC3-signed zone, so the name cannot be enumerated), with live position in a shared online-signed zone:<a href="#section-17.2-8" class="pilcrow">¶</a></p>
 <div class="lang-cbor-diag sourcecode" id="section-17.2-9">
 <pre>
 / EMBLEM at c-7f3k9q2m._diem.forwarder.example /
@@ -2362,18 +2470,20 @@ The pallet producer publishes the mark's data, and the NPPO endorses the produce
     "carrier":          "EXSC",
     "vessel":           "EXAMPLE STAR",
     "voyage":           "042E",
-    "port-of-lading":   "VNSGN",   / UN/LOCODE /
+    "port-of-lading":   "VNSGN",   / UN LOCODE /
     "port-of-unlading": "USLAX"
   },
-  "valuation":  16(...),           / encrypted to customs /
-  "parties":    16(...),           / encrypted: seller, buyer, /
+  "valuation":  96(...),           / encrypted to origin and   /
+                                   / destination customs       /
+  "parties":    96(...),           / likewise: seller, buyer,  /
                                    / importer of record, bond, /
                                    / ship-to, consolidator,    /
                                    / stuffing location         /
   "contents": [
     {"emblem": "p-20261031-0042._diem.pallets.example"},
-    {"emblem": "x1.models._diem.maker.example", "count": 1400,
-     "items-digest": h'9a0c...'}   / digest of the item name list /
+    {"emblem": "std.x1.models._diem.maker.example", "count": 600},
+    {"emblem": "pro.x1.models._diem.maker.example", "count": 500},
+    {"emblem": "max.x1.models._diem.maker.example", "count": 300}
   ]
 }
 
@@ -2391,8 +2501,14 @@ Its plaintext uses monetary amounts (a decimal and an ISO 4217 code) and the com
   "related-party": false,
   "incoterm":   "FOB",                   / ICC Incoterms rule /
   "invoice":    "INV-2026-10-4471",
-  "unit-price": [4([-1, 4125]), "USD"],  / 412.50 /
-  "quantity":   1400,
+  "lines": [
+    {"class-ref": "std.x1.models._diem.maker.example", "line-qty": 600,
+     "unit-price": [4([1, 38]), "USD"]},    / 380 /
+    {"class-ref": "pro.x1.models._diem.maker.example", "line-qty": 500,
+     "unit-price": [4([1, 42]), "USD"]},    / 420 /
+    {"class-ref": "max.x1.models._diem.maker.example", "line-qty": 300,
+     "unit-price": [4([0, 465]), "USD"]}    / 465 /
+  ],
   "total":      [4([2, 5775]), "USD"],   / 577,500 /
   "freight":    [4([2, 32]), "USD"],     / 3,200 /
   "insurance":  [4([0, 1155]), "USD"],   / 1,155 /
@@ -2405,9 +2521,9 @@ Its plaintext uses monetary amounts (a decimal and an ISO 4217 code) and the com
           <dd style="margin-left: 1.5em" id="section-17.2-12.2">
             <p id="section-17.2-12.2.1">The officer scans the consignment's code, validates the forwarder's emblem, and decrypts the valuation and parties with the customs authority's key.
 The container and seal numbers, gross mass, and transport references tie the emblem to the carrier's manifest and to what is physically in front of the officer.
-National requirements (here a US tariff number, manufacturer identification code, and radio equipment authorization) are keys like any other.
-Because amounts are typed decimals with currency codes, software can check that unit price times quantity matches the total and the declared item count, compare the unit price with what is plausible for HS 8517.13 and model X1, and compute the customs value on the authority's own basis (adding freight and insurance where it values on a CIF basis).
-The officer also checks the dangerous goods classification, optionally validates the pallet's ISPM 15 data and NPPO endorsement, and can follow the class emblem's component attestations where supply-chain tracing is required.
+National requirements (here a US tariff number, manufacturer identification code, and radio equipment authorization) are map keys like any other.
+Because amounts are typed decimals with currency codes, software can check that the lines' unit prices times quantities sum to the total and match the declared counts, compare each unit price with what is plausible for HS 8517.13 and that variant, and compute the customs value on the authority's own basis (adding freight and insurance where it values on a CIF basis).
+The officer also checks the dangerous goods classification (following each variant's reference to the family's data), and optionally validates the pallet's ISPM 15 data and NPPO endorsement.
 A retained copy of the validated response records exactly what the forwarder declared, which matters if the valuation is later disputed.<a href="#section-17.2-12.2.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
@@ -2417,13 +2533,13 @@ A retained copy of the validated response records exactly what the forwarder dec
 Here, the officer checks that a device's item emblem exists in the brand's own zone and validates with DNSSEC, which confirms that the manufacturer issued that serial number for that model; a serial that does not resolve, or resolves to a different model, is a red flag.
 The officer must still confirm that the zone really is the brand's (lookalike domains are the counterfeiter's obvious move), for example against a list of brand domains the customs authority maintains.
 An emblem alone does not prove that a physical item is the one the serial was issued for, since a counterfeiter can copy a genuine serial.
-Profiles can address cloning by binding a device-held key into the item emblem so that the device can prove possession when scanned, or by letting the manufacturer flag serials reported in implausible places.
+Profiles can address cloning by binding a device-held key into the item emblem so that the device can prove possession when scanned, or by letting the manufacturer flag serials reported in implausible places (binding carriers to assets in general is an open issue, <a href="#open-issues" class="auto internal xref">Section 18</a>).
 This replaces today's bespoke per-brand lookup arrangements with one validator that works for every brand and every shipment.<a href="#section-17.2-12.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-17.2-12.5">Recycler:</dt>
           <dd style="margin-left: 1.5em" id="section-17.2-12.6">
-            <p id="section-17.2-12.6.1">Years later, a recycler scans one device, validates its item emblem, walks up to the class emblem, and reads the battery chemistry and energy.
+            <p id="section-17.2-12.6.1">Years later, a recycler scans one device, validates its item emblem, follows its class references to the variant and family emblems, and reads the battery chemistry and energy.
 It never sees the commercial data, and never needs to.<a href="#section-17.2-12.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
@@ -2440,7 +2556,8 @@ Those marks are easy to forge and impossible to verify at a distance, and the re
 <span class="break"></span><dl class="dlParallel" id="section-17.3-2">
           <dt id="section-17.3-2.1">Issuer:</dt>
           <dd style="margin-left: 1.5em" id="section-17.3-2.2">
-            <p id="section-17.3-2.2.1">The sending state's ministry of foreign affairs publishes an emblem for each pouch under an unguessable label in its own zone, using a denial-of-existence method that prevents enumeration (<a href="#confidentiality" class="auto internal xref">Section 9</a>).<a href="#section-17.3-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-17.3-2.2.1">The sending state's ministry of foreign affairs (MFA) publishes an emblem for each pouch under an unguessable label in its own zone, using a denial-of-existence method that prevents enumeration (<a href="#confidentiality" class="auto internal xref">Section 9</a>).
+The emblem's subject is the pouch itself; the seal number is a cross-check identifier that ties the emblem to the physical pouch (<a href="#subject" class="auto internal xref">Section 5.1</a>).<a href="#section-17.3-2.2.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
@@ -2510,7 +2627,9 @@ It is a dynamic facet in the mission's online-signed zone, encrypted to the miss
           <dd style="margin-left: 1.5em" id="section-17.4-2.6">
             <p id="section-17.4-2.6.1">Each person's emblem is published under an unguessable label that is replaced at every rotation, so that a name scanned once does not identify the person in future deployments.
 The emblem carries the mission, the person's protected status, and a validity period.
-Their identity is not in it, even in encrypted form, because it is not needed to confirm that the bearer is a member of the mission.<a href="#section-17.4-2.6.1" class="pilcrow">¶</a></p>
+Their identity is not in it, even in encrypted form.
+The emblem therefore shows that a badge was issued by the mission, not that the person carrying it is the one it was issued to.
+Binding a badge to its bearer, so that a copied or relayed badge does not pass, is an open issue (<a href="#open-issues" class="auto internal xref">Section 18</a>); a stolen badge is handled by removing its emblem and by the checkpoint's own checks.<a href="#section-17.4-2.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
@@ -2538,7 +2657,7 @@ Their identity is not in it, even in encrypted form, because it is not needed to
 <span class="break"></span><dl class="dlParallel" id="section-17.4-4">
           <dt id="section-17.4-4.1">Validator:</dt>
           <dd style="margin-left: 1.5em" id="section-17.4-4.2">
-            <p id="section-17.4-4.2.1">At a checkpoint, a soldier scans a badge, validates the emblem and the mission's endorsement, and learns that the bearer is a member of the mission.
+            <p id="section-17.4-4.2.1">At a checkpoint, a soldier scans a badge, validates the emblem and the mission's endorsement, and learns that the badge is a current badge of the mission.
 If a badge does not validate, nothing on it can be trusted, including any instructions it carries.
 The mission therefore publishes its point of contact and what it asks in that case ("if-invalid") in its own emblem, which the validator validates separately and can cache or carry in an offline bundle.<a href="#section-17.4-4.2.1" class="pilcrow">¶</a></p>
 </dd>
@@ -2546,7 +2665,7 @@ The mission therefore publishes its point of contact and what it asks in that ca
 <dt id="section-17.4-4.3">Privacy:</dt>
           <dd style="margin-left: 1.5em" id="section-17.4-4.4">
             <p id="section-17.4-4.4.1">The mission's authoritative servers see, through resolvers, when each personnel emblem is queried, and could build a map of where its people are being checked.
-The profile may treat that as useful (stray reporting) or as a risk to manage, but it should say which (<a href="#privacy" class="auto internal xref">Section 19</a>).
+The profile may treat that as useful (stray reporting) or as a risk to manage, but it should say which (<a href="#privacy" class="auto internal xref">Section 20</a>).
 If an individual's emblem raises their risk, the mission removes it, and short signature lifetimes bound how long it can be replayed.<a href="#section-17.4-4.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
@@ -2566,81 +2685,138 @@ Each is a profile, not a new architecture.<a href="#section-17.5-1" class="pilcr
 </div>
 </section>
 </div>
-<div id="security-considerations">
+<div id="open-issues">
 <section id="section-18">
-      <h2 id="name-security-considerations">
-<a href="#section-18" class="section-number selfRef">18. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      <h2 id="name-open-issues">
+<a href="#section-18" class="section-number selfRef">18. </a><a href="#name-open-issues" class="section-name selfRef">Open Issues</a>
       </h2>
-<p id="section-18-1">DNSSEC provides integrity and origin authentication for emblem data only if validators actually validate.
+<p id="section-18-1">The following questions are open for working group discussion.
+For each, this document describes a rational interim behavior or the options it sees, without settling the matter.<a href="#section-18-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-18-2">
+        <dt id="section-18-2.1">Binding a carrier to its asset:</dt>
+        <dd style="margin-left: 1.5em" id="section-18-2.2">
+          <p id="section-18-2.2.1">DNSSEC prevents an emblem from being moved to another name, and binding each facet and ciphertext to its emblem prevents mixing them between emblems.
+Nothing in the DNS data, however, binds a physical label, tag, or badge to the asset it is attached to: a label can be copied onto another item, and a badge scanned at one checkpoint can be relayed to someone else.
+Possible approaches include a key held in the tag or badge that answers a validator's challenge (which works offline), and a salted digest of a photograph or other attribute shown on the carrier, which a person compares without the emblem revealing whose it is.
+Neither addresses a stolen carrier, which needs removal of the emblem and checks by the people at the scene.<a href="#section-18-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-18-2.3">Recipients not known at issuance:</dt>
+        <dd style="margin-left: 1.5em" id="section-18-2.4">
+          <p id="section-18-2.4.1">Encryption to named recipients (<a href="#confidentiality" class="auto internal xref">Section 9</a>) works where a profile can name its recipients' roles in advance.
+It does not by itself reach a party that was not foreseen, such as the customs authority of a country to which a flight is diverted.
+Options include keys held for a role or region by an organization that recipients trust (a policy question more than a protocol one), re-encryption to new recipients in a dynamic facet when plans change, and disclosure by the issuer on request (which identifies the validator to the issuer).<a href="#section-18-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-18-2.5">Long offline periods:</dt>
+        <dd style="margin-left: 1.5em" id="section-18-2.6">
+          <p id="section-18-2.6.1">Offline bundles expire with their shortest signature lifetime, including those of the root and TLD zones (<a href="#offline" class="auto internal xref">Section 10</a>).
+Options for journeys longer than those lifetimes include validators preferring their own cached upper chain to the bundle's, trust anchors closer to issuers so that the issuer controls the relevant signature lifetimes, re-bundling at transshipment points, and profiles that accept validation as of a past time where that suffices.
+Larger post-quantum signatures add to the pressure to anchor closer to issuers.<a href="#section-18-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-18-2.7">Revocation for offline validators:</dt>
+        <dd style="margin-left: 1.5em" id="section-18-2.8">
+          <p id="section-18-2.8.1">Online validators learn of removal from authenticated denial of existence (<a href="#lifecycle" class="auto internal xref">Section 11</a>).
+Offline validators cannot, so a removed emblem in a bundle remains acceptable until its signatures expire.
+A signed status list of revoked emblems (as digests), carried with the validator's trust anchors, would help where revocation must be prompt (a stolen badge, for example), but publishing such a list defeats the purpose of removal where the aim is to stop being findable, as it may be under IHL.<a href="#section-18-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-18-2.9">Visual mark mismatch:</dt>
+        <dd style="margin-left: 1.5em" id="section-18-2.10">
+          <p id="section-18-2.10.1">When a visual mark's digest does not match the digest in the endorsement (<a href="#marks" class="auto internal xref">Section 6.5</a>), the interim behavior is that the mark is not authorized while the emblem and its data remain valid.
+Validators must not present such a mark as authorized and should tell the person that it is not, rather than silently omitting it, and must keep "mark not authorized" visibly distinct from "emblem invalid", so that a protected site does not appear unprotected.
+The digest is computed over the image octets as published in the mark facet, before any transfer compression and without canonicalization.
+The alternative of treating a mismatch as invalidating the emblem is open, and profiles may be stricter.<a href="#section-18-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-18-2.11">Hiding the act of validation:</dt>
+        <dd style="margin-left: 1.5em" id="section-18-2.12">
+          <p id="section-18-2.12.1">The baseline of <a href="#undetectable" class="auto internal xref">Section 12</a> (large shared resolvers without client subnet information, encrypted transports, caching, and self-contained emblems with stapled endorsements) hides who is validating, but not that someone is, from an issuer that watches its own authoritative server.
+Hiding the act itself needs the query that retrieves an emblem to be one that ordinary clients make anyway; candidate techniques, such as carrying the emblem in a record clients already request, constrain where emblems can be published and are not yet worked out.
+The interim behavior is the baseline, and a profile that needs more says so in its threat model.<a href="#section-18-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-19">
+      <h2 id="name-security-considerations">
+<a href="#section-19" class="section-number selfRef">19. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-19-1">DNSSEC provides integrity and origin authentication for emblem data only if validators actually validate.
 Validators must perform DNSSEC validation themselves, or use a resolver they trust over a secure channel, and must treat bogus emblem data as absent.
-Unsigned emblem data must also be treated as absent unless the profile permits unvalidated emblems, in which case it carries no assurance of origin or integrity.<a href="#section-18-1" class="pilcrow">¶</a></p>
-<p id="section-18-2">An emblem is a statement by a zone holder.
+Unsigned emblem data must also be treated as absent unless the profile permits unvalidated emblems, in which case it carries no assurance of origin or integrity.<a href="#section-19-1" class="pilcrow">¶</a></p>
+<p id="section-19-2">An emblem is a statement by a zone holder.
 Validators must not infer authorization from publication; where a profile requires authorization, the validator must validate the endorsement as well.
-Lookalike and typosquatted domains are not addressed by DNSSEC; cross-check identifiers and endorsements mitigate them.<a href="#section-18-2" class="pilcrow">¶</a></p>
-<p id="section-18-3">Removal is bounded by signature lifetimes and caching, and passive DNS collection means that removed emblems may remain known.
-Profiles with removability requirements must account for both.<a href="#section-18-3" class="pilcrow">¶</a></p>
-<p id="section-18-4">Encrypted values protect confidentiality, but metadata remains visible: the emblem name, the profile, the size of the ciphertext, and the timing of queries.
-Unguessable labels, with compact denial or NSEC3 rather than plain NSEC, reduce enumeration risk.<a href="#section-18-4" class="pilcrow">¶</a></p>
-<p id="section-18-5">Full audits of hierarchical emblems cause many queries; offline bundles and caching mitigate this, and profiles should state what depth of validation they expect.<a href="#section-18-5" class="pilcrow">¶</a></p>
-<p id="section-18-6">Validity checks depend on time.
-A validator whose clock is wrong, or can be set back by an attacker, will accept expired signatures and replayed emblems, which matters most for offline validators.<a href="#section-18-6" class="pilcrow">¶</a></p>
-<p id="section-18-7">Validators that display images supplied by issuers face two risks: the image may mislead a person (a lookalike mark, or a mark that contradicts the emblem's data), and the image format may attack the software that renders it.
-Validators should display only visual marks that meet the conditions of <a href="#marks" class="auto internal xref">Section 6.4</a>, render them with a restricted renderer, and never let a visual mark override the emblem's data.<a href="#section-18-7" class="pilcrow">¶</a></p>
-<p id="section-18-8">As with physical emblems, displaying a digital emblem may increase an asset's risk in some contexts.
-Profiles should consider this when specifying discovery and removal.<a href="#section-18-8" class="pilcrow">¶</a></p>
+Lookalike and typosquatted domains are not addressed by DNSSEC; endorsements (or a validator's own list of known issuers) mitigate them, and cross-check identifiers on the asset add a further check.<a href="#section-19-2" class="pilcrow">¶</a></p>
+<p id="section-19-3">Removal is bounded by signature lifetimes and caching, and passive DNS collection means that removed emblems may remain known.
+Profiles with removability requirements must account for both.<a href="#section-19-3" class="pilcrow">¶</a></p>
+<p id="section-19-4">Encrypted values protect confidentiality, but metadata remains visible: the emblem name, the profile, the size of the ciphertext, and the timing of queries.
+Where a value's size is itself sensitive, the profile can fix its length or require padding before encryption.
+Unguessable labels, with compact denial or NSEC3 rather than plain NSEC, reduce enumeration risk.<a href="#section-19-4" class="pilcrow">¶</a></p>
+<p id="section-19-5">Full audits of hierarchical emblems cause many queries; offline bundles and caching mitigate this, and profiles should state what depth of validation they expect.<a href="#section-19-5" class="pilcrow">¶</a></p>
+<p id="section-19-6">Citations of a treatment's legal basis (<a href="#treatment" class="auto internal xref">Section 6.4</a>) are compared and displayed, never dereferenced as part of validation, so an emblem cannot direct validators to fetch from a third party.<a href="#section-19-6" class="pilcrow">¶</a></p>
+<p id="section-19-7">Validity checks depend on time.
+A validator whose clock is wrong, or can be set back by an attacker, will accept expired signatures and replayed emblems, which matters most for offline validators.<a href="#section-19-7" class="pilcrow">¶</a></p>
+<p id="section-19-8">Validators that display images supplied by issuers face two risks: the image may mislead a person (a lookalike mark, or a mark that contradicts the emblem's data), and the image format may attack the software that renders it.
+Validators should display only visual marks that meet the conditions of <a href="#marks" class="auto internal xref">Section 6.5</a>, render them with a restricted renderer, and never let a visual mark override the emblem's data.<a href="#section-19-8" class="pilcrow">¶</a></p>
+<p id="section-19-9">As with physical emblems, displaying a digital emblem may increase an asset's risk in some contexts.
+Profiles should consider this when specifying discovery and removal.<a href="#section-19-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="privacy">
-<section id="section-19">
+<section id="section-20">
       <h2 id="name-privacy-considerations">
-<a href="#section-19" class="section-number selfRef">19. </a><a href="#name-privacy-considerations" class="section-name selfRef">Privacy Considerations</a>
+<a href="#section-20" class="section-number selfRef">20. </a><a href="#name-privacy-considerations" class="section-name selfRef">Privacy Considerations</a>
       </h2>
-<p id="section-19-1">Emblems are published so that they can be read, and the privacy questions concern who learns what beyond the emblem's intended content <span>[<a href="#RFC6973" class="cite xref">RFC6973</a>]</span>.<a href="#section-19-1" class="pilcrow">¶</a></p>
-<span class="break"></span><dl class="dlParallel" id="section-19-2">
-        <dt id="section-19-2.1">Validators:</dt>
-        <dd style="margin-left: 1.5em" id="section-19-2.2">
-          <p id="section-19-2.2.1">Each query reveals interest in an asset to the validator's resolver and, through the resolver, to the issuer's authoritative servers and to any authorizing entity whose endorsement is queried.
+<p id="section-20-1">Emblems are published so that they can be read, and the privacy questions concern who learns what beyond the emblem's intended content <span>[<a href="#RFC6973" class="cite xref">RFC6973</a>]</span>.<a href="#section-20-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-20-2">
+        <dt id="section-20-2.1">Validators:</dt>
+        <dd style="margin-left: 1.5em" id="section-20-2.2">
+          <p id="section-20-2.2.1">Each query reveals interest in an asset to the validator's resolver and, through the resolver, to the issuer's authoritative servers and to any authorizing entity whose endorsement is queried.
 For some profiles this is harmless; for others the pattern of inspections is itself sensitive.
-<a href="#undetectable" class="auto internal xref">Section 12</a> describes the available mitigations and their limits.<a href="#section-19-2.2.1" class="pilcrow">¶</a></p>
+<a href="#undetectable" class="auto internal xref">Section 12</a> describes the available mitigations and their limits.<a href="#section-20-2.2.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-19-2.3">Issuers:</dt>
-        <dd style="margin-left: 1.5em" id="section-19-2.4">
-          <p id="section-19-2.4.1">An issuer's emblem names can reveal its inventory, its customers, or its operations.
-Enumeration of a zone (by NSEC walking) or of an authorizing entity's endorsements exposes them in bulk, which unguessable labels and enumeration-resistant denial address (<a href="#confidentiality" class="auto internal xref">Section 9</a>).<a href="#section-19-2.4.1" class="pilcrow">¶</a></p>
+<dt id="section-20-2.3">Issuers:</dt>
+        <dd style="margin-left: 1.5em" id="section-20-2.4">
+          <p id="section-20-2.4.1">An issuer's emblem names can reveal its inventory, its customers, or its operations.
+Enumeration of a zone (by NSEC walking) or of an authorizing entity's endorsements exposes them in bulk, which unguessable labels and enumeration-resistant denial address (<a href="#confidentiality" class="auto internal xref">Section 9</a>).<a href="#section-20-2.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-19-2.5">Assets that are people:</dt>
-        <dd style="margin-left: 1.5em" id="section-19-2.6">
-          <p id="section-19-2.6.1"><span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> includes people among the assets an emblem can mark.
+<dt id="section-20-2.5">Assets that are people:</dt>
+        <dd style="margin-left: 1.5em" id="section-20-2.6">
+          <p id="section-20-2.6.1"><span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> includes people among the assets an emblem can mark.
 An emblem name that stays fixed is a persistent identifier: anyone who scans it once can recognize the person later, link sightings, and watch whether the emblem is still published.
 Profiles that mark people should use unguessable names that change on a schedule suited to the use case, keep personal data out of emblems or encrypt it, avoid publishing location in plaintext, and avoid cross-references that link one person's emblems together.
-The issuer can observe where and when a person's emblem is validated, and a profile should say whether that is intended.<a href="#section-19-2.6.1" class="pilcrow">¶</a></p>
+The issuer can observe where and when a person's emblem is validated, and a profile should say whether that is intended.<a href="#section-20-2.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-19-2.7">Encrypted values:</dt>
-        <dd style="margin-left: 1.5em" id="section-19-2.8">
-          <p id="section-19-2.8.1">Encryption hides content but not size, timing, or the set of recipients a profile defines.
+<dt id="section-20-2.7">Encrypted values:</dt>
+        <dd style="margin-left: 1.5em" id="section-20-2.8">
+          <p id="section-20-2.8.1">Encryption hides content but not size, timing, or the set of recipients a profile defines.
 A value encrypted to a recipient today may be read by anyone who obtains that recipient's key later, and emblems are retained by caches, passive DNS collectors, and validators long after removal (<a href="#lifecycle" class="auto internal xref">Section 11</a>).
-Profiles should not encrypt data whose later disclosure would be harmful unless that risk is acceptable.<a href="#section-19-2.8.1" class="pilcrow">¶</a></p>
+Profiles should not encrypt data whose later disclosure would be harmful unless that risk is acceptable.<a href="#section-20-2.8.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
 </dl>
 </section>
 </div>
 <div id="iana-considerations">
-<section id="section-20">
+<section id="section-21">
       <h2 id="name-iana-considerations">
-<a href="#section-20" class="section-number selfRef">20. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+<a href="#section-21" class="section-number selfRef">21. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-20-1">This document has no IANA actions.
-A specification realizing it would request the EMBLEM and ENDORSE RRTypes and create registries for common keys, profile identifiers, and code-list identifiers.<a href="#section-20-1" class="pilcrow">¶</a></p>
+<p id="section-21-1">This document has no IANA actions.
+A specification realizing it would request the EMBLEM and ENDORSE RRTypes and create registries for common map keys, profile identifiers, and code-list identifiers.<a href="#section-21-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-informative-references">
-<section id="section-21">
+<section id="section-22">
       <h2 id="name-informative-references">
-<a href="#section-21" class="section-number selfRef">21. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+<a href="#section-22" class="section-number selfRef">22. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
       </h2>
 <dl class="references">
 <dt id="API">[API]</dt>
@@ -2723,6 +2899,10 @@ A specification realizing it would request the EMBLEM and ENDORSE RRTypes and cr
       <dd>
 <span class="refAuthor">Phillips, A., Ed.</span> and <span class="refAuthor">M. Davis, Ed.</span>, <span class="refTitle">"Tags for Identifying Languages"</span>, <span class="seriesInfo">BCP 47</span>, <span class="seriesInfo">RFC 5646</span>, <span class="seriesInfo">DOI 10.17487/RFC5646</span>, <time datetime="2009-09" class="refDate">September 2009</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5646">https://www.rfc-editor.org/rfc/rfc5646</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC5890">[RFC5890]</dt>
+      <dd>
+<span class="refAuthor">Klensin, J.</span>, <span class="refTitle">"Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework"</span>, <span class="seriesInfo">RFC 5890</span>, <span class="seriesInfo">DOI 10.17487/RFC5890</span>, <time datetime="2010-08" class="refDate">August 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5890">https://www.rfc-editor.org/rfc/rfc5890</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC6698">[RFC6698]</dt>
       <dd>
 <span class="refAuthor">Hoffman, P.</span> and <span class="refAuthor">J. Schlyter</span>, <span class="refTitle">"The DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS) Protocol: TLSA"</span>, <span class="seriesInfo">RFC 6698</span>, <span class="seriesInfo">DOI 10.17487/RFC6698</span>, <time datetime="2012-08" class="refDate">August 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6698">https://www.rfc-editor.org/rfc/rfc6698</a>&gt;</span>. </dd>
@@ -2803,6 +2983,10 @@ A specification realizing it would request the EMBLEM and ENDORSE RRTypes and cr
       <dd>
 <span class="refAuthor">Schwartz, B.</span>, <span class="refAuthor">Bishop, M.</span>, and <span class="refAuthor">E. Nygren</span>, <span class="refTitle">"Service Binding and Parameter Specification via the DNS (SVCB and HTTPS Resource Records)"</span>, <span class="seriesInfo">RFC 9460</span>, <span class="seriesInfo">DOI 10.17487/RFC9460</span>, <time datetime="2023-11" class="refDate">November 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9460">https://www.rfc-editor.org/rfc/rfc9460</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC9499">[RFC9499]</dt>
+      <dd>
+<span class="refAuthor">Hoffman, P.</span> and <span class="refAuthor">K. Fujiwara</span>, <span class="refTitle">"DNS Terminology"</span>, <span class="seriesInfo">BCP 219</span>, <span class="seriesInfo">RFC 9499</span>, <span class="seriesInfo">DOI 10.17487/RFC9499</span>, <time datetime="2024-03" class="refDate">March 2024</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9499">https://www.rfc-editor.org/rfc/rfc9499</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC9824">[RFC9824]</dt>
       <dd>
 <span class="refAuthor">Huque, S.</span>, <span class="refAuthor">Elmerot, C.</span>, and <span class="refAuthor">O. Gudmundsson</span>, <span class="refTitle">"Compact Denial of Existence in DNSSEC"</span>, <span class="seriesInfo">RFC 9824</span>, <span class="seriesInfo">DOI 10.17487/RFC9824</span>, <time datetime="2025-09" class="refDate">September 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9824">https://www.rfc-editor.org/rfc/rfc9824</a>&gt;</span>. </dd>
@@ -2822,72 +3006,145 @@ A specification realizing it would request the EMBLEM and ENDORSE RRTypes and cr
 </dl>
 </section>
 </div>
-<div id="changes-from-draft-rosenberg-diem-architecture-01">
+<div id="encoded">
 <section id="appendix-A">
-      <h2 id="name-changes-from-draft-rosenber">
-<a href="#name-changes-from-draft-rosenber" class="section-name selfRef">Changes from draft-rosenberg-diem-architecture-01</a>
+      <h2 id="name-encoded-example">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-encoded-example" class="section-name selfRef">Encoded Example</a>
       </h2>
-<p id="appendix-A-1">This section is to be removed before publishing as an RFC.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-1">The ISPM 15 emblem of <a href="#ex-logistics" class="auto internal xref">Section 17.2</a>, encoded as the strawman describes (<a href="#strawman" class="auto internal xref">Section 16</a>), is 59 octets.
+In CBOR diagnostic notation with the integer map keys and enumerated values that an encoding uses (the comments give the names used in this document, and the numbers are illustrative):<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<div class="lang-cbor-diag sourcecode" id="appendix-A-2">
+<pre>
+{
+  1 / profile /: 5 / ispm15 /,
+  2 / asset /: "p-20261031-0042._diem.pallets.example",
+  -1 / country /: "VN",
+  -2 / producer /: "000123",
+  -3 / measure /: "HT"
+}
+</pre><a href="#appendix-A-2" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-3">As a resource record in the generic presentation format of <span>[<a href="#RFC3597" class="cite xref">RFC3597</a>]</span> (EMBLEM has no type code, so a private-use type number stands in):<a href="#appendix-A-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A-4">
+<pre>
+p-20261031-0042._diem.pallets.example. 3600 IN TYPE65280 \# 59 (
+    a50105027825702d3230323631303331
+    2d303034322e5f6469656d2e70616c6c
+    6574732e6578616d706c652062564e21
+    6630303031323322624854 )
+</pre><a href="#appendix-A-4" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="changes-from-draft-rosenberg-diem-architecture-02">
+<section id="appendix-B">
+      <h2 id="name-changes-from-draft-rosenber">
+<a href="#name-changes-from-draft-rosenber" class="section-name selfRef">Changes from draft-rosenberg-diem-architecture-02</a>
+      </h2>
+<p id="appendix-B-1">This section is to be removed before publishing as an RFC.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="appendix-A-2.1">
-          <p id="appendix-A-2.1.1">Fixed some known errata and made minor touchups.<a href="#appendix-A-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="appendix-B-2.1">
+          <p id="appendix-B-2.1.1">Defined the subject of an emblem: the asset named by the <code>asset</code> map key, which may be a person, place, or thing, physical or digital.<a href="#appendix-B-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-B-2.2">
+          <p id="appendix-B-2.2.1">Allowed several profiles for one asset (one record per profile), with validators skipping profiles and map keys they do not understand.<a href="#appendix-B-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-B-2.3">
+          <p id="appendix-B-2.3.1">Allowed issuer-defined map keys, named under a domain the issuer controls.<a href="#appendix-B-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-B-2.4">
+          <p id="appendix-B-2.4.1">Distinguished issuer authorization from validator authorization, and allowed an emblem to carry several endorsements.<a href="#appendix-B-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-B-2.5">
+          <p id="appendix-B-2.5.1">Generalized hierarchy to digital and mixed assets, using explicit references (relative within an issuer) instead of deriving names, and reworked the logistics example accordingly.<a href="#appendix-B-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-B-2.6">
+          <p id="appendix-B-2.6.1">Added required facets and an indeterminate validation result, and evaluation at a single time for validators that combine records.<a href="#appendix-B-2.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-B-2.7">
+          <p id="appendix-B-2.7.1">Clarified recipients, ciphertext binding, and optional salted plaintext digests in confidentiality, and that the <code>_diem</code> delegation is operational.<a href="#appendix-B-2.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-B-2.8">
+          <p id="appendix-B-2.8.1">Revised offline clock and shelf-life text, and noted that a live query is the status check for removal.<a href="#appendix-B-2.8.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-B-2.9">
+          <p id="appendix-B-2.9.1">Let profiles choose exact decimals or floating point per map key.<a href="#appendix-B-2.9.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-B-2.10">
+          <p id="appendix-B-2.10.1">Added an Open Issues section and an encoded example.<a href="#appendix-B-2.10.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-B-2.11">
+          <p id="appendix-B-2.11.1">Terminology: "map key", "external code", and "delegation".<a href="#appendix-B-2.11.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+</section>
+</div>
+<div id="changes-from-draft-rosenberg-diem-architecture-01">
+<section id="appendix-C">
+      <h2 id="name-changes-from-draft-rosenberg">
+<a href="#name-changes-from-draft-rosenberg" class="section-name selfRef">Changes from draft-rosenberg-diem-architecture-01</a>
+      </h2>
+<p id="appendix-C-1">This section is to be removed before publishing as an RFC.<a href="#appendix-C-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-C-2.1">
+          <p id="appendix-C-2.1.1">Fixed some known errata and made minor touchups.<a href="#appendix-C-2.1.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
 </div>
 <div id="changes-from-draft-rosenberg-diem-architecture-00">
-<section id="appendix-B">
-      <h2 id="name-changes-from-draft-rosenberg">
-<a href="#name-changes-from-draft-rosenberg" class="section-name selfRef">Changes from draft-rosenberg-diem-architecture-00</a>
+<section id="appendix-D">
+      <h2 id="name-changes-from-draft-rosenberg-">
+<a href="#name-changes-from-draft-rosenberg-" class="section-name selfRef">Changes from draft-rosenberg-diem-architecture-00</a>
       </h2>
-<p id="appendix-B-1">This section is to be removed before publishing as an RFC.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-D-1">This section is to be removed before publishing as an RFC.<a href="#appendix-D-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="appendix-B-2.1">
-          <p id="appendix-B-2.1.1">Adopted DNSSEC as the integrity layer, replacing application-layer hashing of emblem records.<a href="#appendix-B-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="appendix-D-2.1">
+          <p id="appendix-D-2.1.1">Adopted DNSSEC as the integrity layer, replacing application-layer hashing of emblem records.<a href="#appendix-D-2.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-B-2.2">
-          <p id="appendix-B-2.2.1">Replaced "signed" and "informational" fields with static and dynamic facets in separate RRsets.<a href="#appendix-B-2.2.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-D-2.2">
+          <p id="appendix-D-2.2.1">Replaced "signed" and "informational" fields with static and dynamic facets in separate RRsets.<a href="#appendix-D-2.2.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-B-2.3">
-          <p id="appendix-B-2.3.1">Replaced the Merkle-tree hierarchy with DNS naming plus cross-zone references with optional digests.<a href="#appendix-B-2.3.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-D-2.3">
+          <p id="appendix-D-2.3.1">Replaced the Merkle-tree hierarchy with DNS naming plus cross-zone references with optional digests.<a href="#appendix-D-2.3.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-B-2.4">
-          <p id="appendix-B-2.4.1">Added typed keys and external code lists as value types.<a href="#appendix-B-2.4.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-D-2.4">
+          <p id="appendix-D-2.4.1">Added typed keys and external code lists as value types.<a href="#appendix-D-2.4.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-B-2.5">
-          <p id="appendix-B-2.5.1">Added treatment (requested actions with an open legal basis) as a common key.<a href="#appendix-B-2.5.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-D-2.5">
+          <p id="appendix-D-2.5.1">Added treatment (requested actions with an open legal basis) as a common key.<a href="#appendix-D-2.5.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-B-2.6">
-          <p id="appendix-B-2.6.1">Added visual marks, displayed only when endorsed or canonical.<a href="#appendix-B-2.6.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-D-2.6">
+          <p id="appendix-D-2.6.1">Added visual marks, displayed only when endorsed or canonical.<a href="#appendix-D-2.6.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-B-2.7">
-          <p id="appendix-B-2.7.1">Added endorsement (as RRsets in the authorizing entity's zone, queried or stapled), confidentiality, offline bundles, lifecycle, and undetectable validation sections.<a href="#appendix-B-2.7.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-D-2.7">
+          <p id="appendix-D-2.7.1">Added endorsement (as RRsets in the authorizing entity's zone, queried or stapled), confidentiality, offline bundles, lifecycle, and undetectable validation sections.<a href="#appendix-D-2.7.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-B-2.8">
-          <p id="appendix-B-2.8.1">Added what a profile specifies, and an outline of validation common to all profiles.<a href="#appendix-B-2.8.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-D-2.8">
+          <p id="appendix-D-2.8.1">Added what a profile specifies, and an outline of validation common to all profiles.<a href="#appendix-D-2.8.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-B-2.9">
-          <p id="appendix-B-2.9.1">Added Privacy Considerations.<a href="#appendix-B-2.9.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-D-2.9">
+          <p id="appendix-D-2.9.1">Added Privacy Considerations.<a href="#appendix-D-2.9.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-B-2.10">
-          <p id="appendix-B-2.10.1">Added a strawman EMBLEM encoding using deterministic CBOR.<a href="#appendix-B-2.10.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-D-2.10">
+          <p id="appendix-D-2.10.1">Added a strawman EMBLEM encoding using deterministic CBOR.<a href="#appendix-D-2.10.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-B-2.11">
-          <p id="appendix-B-2.11.1">Added worked examples for IHL, logistics and customs, diplomatic pouches, and peacekeeping.<a href="#appendix-B-2.11.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-D-2.11">
+          <p id="appendix-D-2.11.1">Added worked examples for IHL, logistics and customs, diplomatic pouches, and peacekeeping.<a href="#appendix-D-2.11.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
 </div>
 <div id="acknowledgments">
-<section id="appendix-C">
+<section id="appendix-E">
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-C-1">The author thanks the participants of the DIEM working group for their drafts and comments.<a href="#appendix-C-1" class="pilcrow">¶</a></p>
+<p id="appendix-E-1">The author thanks the participants of the DIEM working group for their drafts and comments, and Rohan Mahy for a detailed review of -01, including the suggestion of salted plaintext digests.<a href="#appendix-E-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
-<section id="appendix-D">
+<section id="appendix-F">
       <h2 id="name-authors-address">
 <a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
       </h2>
