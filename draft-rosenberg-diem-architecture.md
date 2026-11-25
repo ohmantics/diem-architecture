@@ -801,7 +801,7 @@ Placement:
   ]
 }
 
-/ ENDORSE at 3q9v...._endorse.health.gov.example (stapled above) /
+/ ENDORSE at i9ee...._endorse.health.gov.example (stapled above) /
 {
   "profile": "endorsement",
   "issuer":  "hospital.example",
@@ -904,7 +904,7 @@ The pallet producer publishes the mark's data, and the NPPO endorses the produce
   "producer":  "000123",      / registration number from the NPPO /
   "measure":   "HT"           / ISPM 15 treatment: heat /
 }
-/ ENDORSE at pallets.example._endorse.nppo.gov.example /
+/ ENDORSE at ajja...._endorse.nppo.vn.example /
 ~~~
 
 The consignment is an emblem subject in its own right, because it is what customs acts on: it is declared, examined, and released as a unit, whatever it contains.
@@ -956,7 +956,7 @@ Its plaintext uses monetary amounts (a decimal and an ISO 4217 code) and the com
 {
   "method":     "transaction-value",   / customs valuation method /
   "related-party": false,
-  "incoterm":   "FOB",                   / ICC Incoterms rule /
+  "incoterm":   "FCA",                   / ICC Incoterms rule /
   "invoice":    "INV-2026-10-4471",
   "lines": [
     {"class-ref": "std.x1.models._diem.maker.example", "line-qty": 600,
@@ -1069,7 +1069,7 @@ Personnel:
   "profile":  "peacekeeping-mission",
   "asset":    "mission.example",
   "contact":  32("https://mission.example/report"),
-  "if-invalid": [{"request": "report"}, {"request": "hold"}]
+  "if-invalid": [{"request": "report"}, {"request": "verify-identity"}]
 }
 ~~~
 
