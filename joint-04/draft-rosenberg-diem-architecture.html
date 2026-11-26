@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Digital Emblems Architecture</title>
+<meta content="Alex Rosenberg" name="author">
+<meta content="
+       This document describes an architecture for digital emblems: authenticated, typed statements about assets, made by the holder of a domain name and published in the DNS.
+It defines the roles involved, the components that connect them, and how trust is anchored, and it explains how individual use cases are accommodated by profiles.
+It leaves wire formats and protocol details to other documents. 
+    " name="description">
+<meta content="xml2rfc 3.35.0" name="generator">
+<meta content="digital emblems" name="keyword">
+<meta content="architecture" name="keyword">
+<meta content="DNS" name="keyword">
+<meta content="DNSSEC" name="keyword">
+<meta content="draft-rosenberg-diem-architecture-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.35.0
+    Python 3.14.10
+    ConfigArgParse 1.10.1
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.1.1
+    natsort 8.4.0
+    platformdirs 4.14.7
+    pycountry 24.6.1
+    PyYAML 6.0.3
+    requests 2.33.1
+    wcwidth 0.9.4
+-->
+<link href="draft-rosenberg-diem-architecture.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1 {
+  &#title {
+    font-size: 32px;
+    line-height: 40px;
+    clear: both;
+    margin: 1.5em 0 0.2em;
+  }
+  &#rfcnum {
+    margin: 1.5em 0 0.2em;
+    & + h1#title {
+      margin: 0.2em 0;
+    }
+  }
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+  & code, & samp, & tt {
+    font-size: 16px;
+    line-height: 0;
+  }
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    margin: 0;
+    float: right;
+    clear: both;
+  }
+  & > *:nth-child(2) {
+    clear: both;
+    display: block;
+    border: none;
+  }
+}
+svg {
+  display: block;
+  /* font-family isn't space-separated, but =~ will have to do */
+  &[font-family~="monospace" i], & [font-family~="monospace" i] {
+    font-family: var(--font-mono);
+  }
+}
+.alignCenter {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+       support flexbox yet.
+    */
+    display: table;
+    margin: 0 auto;
+  }
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+      float: none;
+    }
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+
+  &:not(.dlNewline) > dt {
+    float: left;
+    margin-right: 2ch;
+    min-width: 8ch;
+  }
+  & > dd {
+    margin-bottom: .8em;
+    margin-left: var(--indent) !important; /* stupid element overrides */
+    min-height: 2ex;
+  }
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a {
+  text-decoration: none;
+  &[href] {
+    color: var(--link-color);
+    &:hover { text-decoration: underline; }
+    &.selfRef {
+      color: var(--text-color);
+      &:hover {
+        text-decoration: none;
+        background-color: var(--highlight-color);
+      }
+    }
+  }
+}
+.iref + a[href].internal {
+  color: var(--text-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+  & blockquote {
+    margin: 0.8em 0.4em 0.4em;
+  }
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) {
+    & p {
+      margin: -2px 0;
+      max-height: 0;
+      transition: max-height 2s ease, margin 0.5s ease 0.5s;
+      overflow: hidden;
+    }
+    &:hover p,
+    & h2:target ~ p {
+      margin: 0.5em 0;
+      max-height: 500px;
+      overflow: auto;
+    }
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  &.right { margin-left: auto; }
+  &.center { margin-left: auto; margin-right: auto; }
+  &.left { margin-right: auto; }
+  & .text-left { text-align: left; }
+  & .text-center { text-align: center; }
+  & .text-right { text-align: right; }
+  & caption {
+    margin: 0;
+    padding: 3px 0 3px 1em;
+  }
+  & p { margin: 0; }
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+  @media not print {
+    :hover > &, &:focus {
+      opacity: 1;
+    }
+    &[href]:hover {
+      color: var(--pilcrow-strong);
+      background-color: transparent;
+    }
+  }
+  @media print {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+  & .prepared {
+    float: right;
+  }
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses {
+    & > section {
+      column-count: 2;
+      column-gap: 20px;
+    }
+    & > section > h2 {
+      column-span: all;
+    }
+    /* hack for break-inside: avoid-column */
+    & address {
+      display: inline-block;
+      break-inside: avoid-column;
+    }
+  }
+}
+
+/* Comments */
+.rfcEditorRemove {
+  & p:first-of-type {
+    font-style: italic;
+  }
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc {
+    & nav {
+      font-family: var(--font-title);
+      font-weight: 360;
+      & > ul { margin-bottom: 2em; }
+      & ul {
+        margin: 0 0 0 4px;
+        & :is(p, li) {
+          margin: 2px 0;
+        }
+      }
+    }
+    & a.toplink {
+      float: right;
+    }
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+    & h2 {
+      margin: 0;
+      padding: 2px 0 2px 6px;
+      padding-right: 1em;
+      font-size: 18px;
+      line-height: 24px;
+      min-width: 190px;
+      text-align: right;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      &::before { /* css hamburger */
+        float: right;
+        position: relative;
+        width: 1em;
+        height: 1px;
+        left: -164px;
+        margin: 8px 0 0 0;
+        background: white none repeat scroll 0 0;
+        box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+        content: "";
+      }
+    }
+    & nav {
+      display: none;
+      background-color: var(--background-color);
+      padding: 0.5em 1em 1em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      height: calc(100vh - 48px);
+      border-left: 1px solid #ddd;
+    }
+    &.active {
+      opacity: 1;
+      & nav { display: block; }
+    }
+    /* Make the collapsed ToC header render white on gray also when it's a link */
+    & h2 a,
+    & h2 a:is(:link, :focus, :hover),
+    & a.toplink,
+    & a.toplink:hover {
+      color: white;
+      background-color: #444;
+      text-decoration: none;
+    }
+    & a.toplink {
+      margin: 2px 0.5em 0;
+    }
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+    & h2 {
+      margin: 0;
+      padding: 0.25em 1em 1em 0;
+    }
+    & nav {
+      display: block;
+      height: calc(90vh - 84px);
+      bottom: 0;
+      padding: 0.5em 0 2em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    & a.toplink {
+      margin: 8px 0.5em 0;
+    }
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc {
+    page-break-before: always;
+    border-top: none;
+    padding-top: 0;
+  }
+  #n-introduction {
+    page-break-before: always;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg {
+  & :is([stroke="black"], [stroke^="#000"]) {
+    stroke: var(--text-color);
+  }
+  & :is([stroke="white"], [stroke^="#fff"]) {
+    stroke: var(--background-color);
+  }
+  & :is([fill="black"], [fill^="#000"], :not([fill], [fill] *)) {
+    fill: var(--text-color);
+  }
+  & :is([fill="white"], [fill^="#fff"]) {
+    fill: var(--background-color);
+  }
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">DIEM Architecture</td>
+<td class="right">November 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Rosenberg</td>
+<td class="center">Expires 30 May 2027</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Digital Emblems</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-rosenberg-diem-architecture-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-11-26" class="published">26 November 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2027-05-30">30 May 2027</time></dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">A. Rosenberg</div>
+<div class="org">Veridigo</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Digital Emblems Architecture</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document describes an architecture for digital emblems: authenticated, typed statements about assets, made by the holder of a domain name and published in the DNS.
+It defines the roles involved, the components that connect them, and how trust is anchored, and it explains how individual use cases are accommodated by profiles.
+It leaves wire formats and protocol details to other documents.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://ohmantics.github.io/diem-architecture/draft-rosenberg-diem-architecture.html">https://ohmantics.github.io/diem-architecture/draft-rosenberg-diem-architecture.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-rosenberg-diem-architecture/">https://datatracker.ietf.org/doc/draft-rosenberg-diem-architecture/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        Digital Emblems Working Group mailing list (<span><a href="mailto:diem@ietf.org">mailto:diem@ietf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/diem/">https://mailarchive.ietf.org/arch/browse/diem/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/diem/">https://www.ietf.org/mailman/listinfo/diem/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/ohmantics/diem-architecture">https://github.com/ohmantics/diem-architecture</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 30 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-terminology" class="internal xref">Terminology</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1" class="keepWithNext"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-design-principles" class="internal xref">Design Principles</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-domain-model" class="internal xref">Domain Model</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-roles-and-interactions" class="internal xref">Roles and Interactions</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-components" class="internal xref">Components</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-emblem-information-model" class="internal xref">Emblem Information Model</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-discovery-and-distribution" class="internal xref">Discovery and Distribution</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
+                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-authorization" class="internal xref">Authorization</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.4">
+                <p id="section-toc.1-1.6.2.4.1"><a href="#section-6.4" class="auto internal xref">6.4</a>.  <a href="#name-validation" class="internal xref">Validation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.5">
+                <p id="section-toc.1-1.6.2.5.1"><a href="#section-6.5" class="auto internal xref">6.5</a>.  <a href="#name-confidentiality-and-selecti" class="internal xref">Confidentiality and Selective Disclosure</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.6">
+                <p id="section-toc.1-1.6.2.6.1"><a href="#section-6.6" class="auto internal xref">6.6</a>.  <a href="#name-lifecycle" class="internal xref">Lifecycle</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-trust-model" class="internal xref">Trust Model</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-profiles" class="internal xref">Profiles</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-future-work" class="internal xref">Future Work</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a href="#name-privacy-considerations" class="internal xref">Privacy Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#section-12" class="auto internal xref">12</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#section-13" class="auto internal xref">13</a>. <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
+            <p id="section-toc.1-1.15.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Physical emblems and markings tell people how to treat what they mark: a red cross on a hospital roof, a seal on a diplomatic bag, a label on a shipment of dangerous goods.
+Their digital counterparts must do the same for assets that people and software encounter over a network, or identify by a name or code: a service, a device, a container, a person on duty.
+<span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> sets out the use cases and the requirements they share.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">A digital emblem, as this architecture describes it, is a statement about an asset made by the holder of a domain name.
+The holder publishes the emblem in the DNS.
+A validator finds it with an ordinary DNS query and checks it with DNSSEC <span>[<a href="#RFC4033" class="cite xref">RFC4033</a>]</span>, which tells the validator which domain name holder made the statement and that the statement has not been altered.
+Where a use case requires it, a separate authorizing entity confirms, in its own part of the DNS, that the issuer is entitled to make the statement.
+What the statement means is set by a profile, which describes the content of emblems for one or more use cases.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">This document describes the roles involved, the components that connect them, how trust is anchored, and how profiles accommodate individual use cases.
+It is the basis for protocol documents that will specify encodings, record types, and procedures, and for profile documents that will specify the content of emblems for particular use cases.
+It does not itself specify any of these.<a href="#section-1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="terminology">
+<section id="section-2">
+      <h2 id="name-terminology">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
+      </h2>
+<p id="section-2-1">This document uses the terms asset, digital emblem (or emblem), and validation as <span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> defines them, and DNS terms as <span>[<a href="#RFC9499" class="cite xref">RFC9499</a>]</span> defines them.
+It uses the term profile for what <span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> calls a digital emblem profile, with the narrower scope described in <a href="#profiles" class="auto internal xref">Section 8</a>.
+It refines the <span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> terms emblem issuer, authorizing entity, and validator by what each produces and consumes, and adds the other terms below.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-2-2">
+        <dt id="section-2-2.1">
+<strong>Emblem issuer (issuer)</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.2">
+          <p id="section-2-2.2.1">Produces emblems about its assets, at names in a DNS zone it controls.
+Consumes authorizations, where its use case requires them.<a href="#section-2-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.3">
+<strong>Emblem publisher</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.4">
+          <p id="section-2-2.4.1">Serves the issuer's emblems in the DNS.
+It may be the issuer itself or a provider to which the issuer delegates part of its namespace.<a href="#section-2-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.5">
+<strong>Authorizing entity</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.6">
+          <p id="section-2-2.6.1">Produces authorizations, in a DNS zone it controls.<a href="#section-2-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.7">
+<strong>Authorization</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.8">
+          <p id="section-2-2.8.1">A statement by an authorizing entity that an issuer may issue emblems of a stated scope (for example, a profile, the purposes it may claim, and a period).<a href="#section-2-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.9">
+<strong>Validator</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.10">
+          <p id="section-2-2.10.1">Consumes emblems, authorizations, and the DNSSEC data that authenticates them.
+Produces a result: valid, invalid, or indeterminate.<a href="#section-2-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.11">
+<strong>Bundle</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.12">
+          <p id="section-2-2.12.1">An emblem together with the DNSSEC records needed to validate it, carried so that it can be validated without querying the DNS.<a href="#section-2-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="principles">
+<section id="section-3">
+      <h2 id="name-design-principles">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-design-principles" class="section-name selfRef">Design Principles</a>
+      </h2>
+<p id="section-3-1">The architecture follows these principles.
+Each is a choice among alternatives that have been discussed in the working group, and the rest of the document depends on them.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-3-2">
+        <dt id="section-3-2.1">
+<strong>Use the DNS</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-3-2.2">
+          <p id="section-3-2.2.1">Emblems are discovered, distributed, and authenticated with the DNS wherever it can do the job.
+If a profile ends up delivering data outside the DNS, that data is referred to, and its integrity pinned, from a DNSSEC-signed record.<a href="#section-3-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-3-2.3">
+<strong>The assertion belongs to the name holder</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-3-2.4">
+          <p id="section-3-2.4.1">An emblem is a statement made by whoever controls a domain name: an organization, a brand, an authority.
+Trust follows the namespace, through DNSSEC <span>[<a href="#RFC4033" class="cite xref">RFC4033</a>]</span>, rather than through any of the many certification authorities that a trust store contains.
+A validator therefore learns who is making the statement, not only that some certification authority vouched for a key.<a href="#section-3-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-3-2.5">
+<strong>One validation model</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-3-2.6">
+          <p id="section-3-2.6.1">Establishing that an emblem is authentic, authorized, and current works the same way for every use case.
+A validator should not need software specific to a use case to do it, so that general-purpose software (including web browsers) can validate and display emblems.<a href="#section-3-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-3-2.7">
+<strong>Profiles describe content, not protocol</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-3-2.8">
+          <p id="section-3-2.8.1">Use cases differ in what their emblems say, not in how emblems are found or trusted.
+A profile is mainly a schema.
+Where a use case needs a mechanism, the mechanism belongs in the common architecture, so that every use case can rely on it.<a href="#section-3-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-3-2.9">
+<strong>Undetectable validation</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-3-2.10">
+          <p id="section-3-2.10.1">Checking an emblem should reveal as little as possible about who is checking, and to whom, because in several use cases the pattern of checks is itself sensitive.<a href="#section-3-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="domain">
+<section id="section-4">
+      <h2 id="name-domain-model">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-domain-model" class="section-name selfRef">Domain Model</a>
+      </h2>
+<p id="section-4-1">An emblem is a statement by an issuer about an asset, its subject.
+The subject may be a single item or a composite (a consignment, a convoy) whose parts carry emblems of their own.
+The subject is the thing the statement is about: for a hospital's records service, the service, not the host it runs on; for a diplomatic bag, the bag, not the courier carrying it.
+An emblem identifies its subject, and may carry further identifiers (a seal number, a serial number) that a validator can compare with what is in front of it.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">An emblem makes assertions about its subject.
+Some describe it (what it is, who operates it, what it contains).
+Some ask something of whoever reads the emblem: not to attack, not to open, to handle with care, to report.
+The architecture calls these requests treatment.
+An emblem may cite the law, agreement, or standard on which its assertions rest, and may name a visual mark that a person can be shown alongside the result.<a href="#section-4-2" class="pilcrow">¶</a></p>
+<p id="section-4-3">An emblem states the period during which its assertions hold.
+It can be withdrawn before the period ends, and it can be replaced.
+This period is part of what the issuer asserts; it is distinct from how long the DNS may cache the emblem and from how long its signatures can be verified (<a href="#lifecycle" class="auto internal xref">Section 6.6</a>).<a href="#section-4-3" class="pilcrow">¶</a></p>
+<p id="section-4-4">In some use cases anyone may issue an emblem about their own asset, and a validator needs to know only who the issuer is.
+In others the issuer must be authorized: a ministry of health authorizes a hospital to use a protective emblem, or a national plant protection organization authorizes a producer to mark wood packaging <span>[<a href="#ISPM15" class="cite xref">ISPM15</a>]</span>.
+More than one authorizing entity may authorize the same issuer, including entities whose claims compete (two states that both claim the territory where a hospital stands), and a validator decides which it recognizes.<a href="#section-4-4" class="pilcrow">¶</a></p>
+<p id="section-4-5">One asset may carry emblems under several profiles at once: a shipment may carry customs data, dangerous goods data, and recycling data, each described by a different profile and read by a different validator.
+An emblem may also refer to other emblems (a consignment to the products it contains).
+Each referenced emblem remains the statement of its own issuer and is validated on its own; a reference may pin the version it refers to.<a href="#section-4-5" class="pilcrow">¶</a></p>
+<p id="section-4-6">Some of what an emblem says may be meant for some validators only: the value of a shipment for customs, the identity of a courier for the receiving state.<a href="#section-4-6" class="pilcrow">¶</a></p>
+<p id="section-4-7">An emblem does not create the status it signals.
+Protection under international humanitarian law, for example, exists in law whether or not an emblem is displayed, so there the absence of an emblem does not mean the absence of protection.
+In other use cases absence does carry meaning (wood packaging without a compliance mark may be refused entry), and each profile says what absence means for it.
+The architecture does not decide who is entitled to issue or authorize emblems; that is for the frameworks behind each use case.
+It does not enforce treatment; it lets a validator learn, reliably, what is asked and by whom.<a href="#section-4-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="roles">
+<section id="section-5">
+      <h2 id="name-roles-and-interactions">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-roles-and-interactions" class="section-name selfRef">Roles and Interactions</a>
+      </h2>
+<p id="section-5-1"><a href="#fig-roles" class="auto internal xref">Figure 1</a> shows the roles and what passes between them.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<span id="name-roles-and-what-passes-betwe"></span><div id="fig-roles">
+<figure id="figure-1">
+        <div class="alignLeft art-ascii-art art-text artwork" id="section-5-2.1">
+<pre>
++--------------------+              +--------------------+
+|   Emblem issuer    |              | Authorizing entity |
+|  (its own zone)    |              |  (its own zone)    |
++---------+----------+              +---------+----------+
+          | publishes                         | publishes
+          | emblem                            | authorization
+          v                                   v
++--------------------+              +--------------------+
+|  Emblem publisher  |              |  DNS, signed with  |
+|  (DNS, DNSSEC)     |              |  DNSSEC            |
++---------+----------+              +---------+----------+
+          | emblem                            | authorization
+          | (queried, or                      | (queried, or
+          |  carried in                       |  carried with
+          |  a bundle)                        |  the emblem)
+          |        +---------------+          |
+          +-------&gt;|   Validator   |&lt;---------+
+                   +-------+-------+
+                           | result: who asserts what
+                           v
+                   +---------------+
+                   | Person or     |
+                   | system acting |
+                   | on it         |
+                   +---------------+
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-roles-and-what-passes-betwe" class="selfRef">Roles and what passes between them</a>
+        </figcaption></figure>
+</div>
+<p id="section-5-3">The issuer wants its assertions about its asset to be found and accepted as authentic by those they are meant for, and not read by others where they are confidential.
+The authorizing entity wants its authorization to be relied on for the scope it granted and no further, and to be able to end it.
+The validator wants to learn, reliably and without revealing more than necessary about itself, what is asserted about an asset and by whom.
+The emblem publisher serves records; it need not be trusted for their integrity, because what it serves is signed by the issuer (unless the issuer has it sign on its behalf), although it can see queries and withhold answers.
+The person or system acting on the result decides what to do; the architecture informs that decision but does not make it.<a href="#section-5-3" class="pilcrow">¶</a></p>
+<p id="section-5-4">These are roles, not organizations.
+An issuer may run its own emblem publisher or delegate that to a provider.
+An authorizing entity may also be the issuer of its own emblems.
+A validator may be a person with a handheld device, a program scanning a network, or a service acting for others.<a href="#section-5-4" class="pilcrow">¶</a></p>
+<p id="section-5-5">Validation happens in three patterns, which a single validator may combine:<a href="#section-5-5" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-5-6">
+        <dt id="section-5-6.1">
+<strong>Online</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-6.2">
+          <p id="section-5-6.2.1">The validator queries the DNS for the emblem and any authorization it needs, through a resolver of its choice.<a href="#section-5-6.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-5-6.3">
+<strong>Offline</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-6.4">
+          <p id="section-5-6.4.1">The validator receives a bundle (from a suitable storage medium such as a tag, a code, a file, or other mechanism) and validates it without network access, against trust anchors it already holds.<a href="#section-5-6.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-5-6.5">
+<strong>Undetectable</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-6.6">
+          <p id="section-5-6.6.1">The validator obtains what it needs in a way that does not reveal its interest to the issuer or the authorizing entity, for example because the authorization is carried with the emblem and the query reaches the emblem publisher only through a shared resolver.<a href="#section-5-6.6.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="components">
+<section id="section-6">
+      <h2 id="name-components">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-components" class="section-name selfRef">Components</a>
+      </h2>
+<p id="section-6-1">Each component below is described by the properties it must provide.
+Encodings, record types, and procedures are left to protocol documents.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<div id="info-model">
+<section id="section-6.1">
+        <h3 id="name-emblem-information-model">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-emblem-information-model" class="section-name selfRef">Emblem Information Model</a>
+        </h3>
+<p id="section-6.1-1">An emblem is a dictionary of metadata about its subject: a set of entries, each pairing a name with a typed value.
+Profiles are schemas for that dictionary (<a href="#profiles" class="auto internal xref">Section 8</a>).
+The architecture defines only what every emblem must be able to carry:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.1-2.1">
+            <p id="section-6.1-2.1.1">the identifiers of its subject;<a href="#section-6.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.1-2.2">
+            <p id="section-6.1-2.2.1">the profile or profiles it follows;<a href="#section-6.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.1-2.3">
+            <p id="section-6.1-2.3.1">the period during which its assertions hold;<a href="#section-6.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.1-2.4">
+            <p id="section-6.1-2.4.1">references to related emblems; and<a href="#section-6.1-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.1-2.5">
+            <p id="section-6.1-2.5.1">values that are confidential to some validators (<a href="#confidentiality" class="auto internal xref">Section 6.5</a>).<a href="#section-6.1-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-6.1-3">Everything else, such as treatment or the legal basis that an emblem under international humanitarian law cites, is defined by profiles.
+The issuer is not an entry, because it is established by the domain name at which the emblem is published.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+<p id="section-6.1-4">Values are typed, and where possible drawn from types and code lists shared across profiles, so that a validator without software specific to a profile can still authenticate an emblem and present its content in a generic form.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
+<p id="section-6.1-5"><span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> lets a profile require validation of all of an emblem's data or only a defined subset, so that frequently changing data need not be re-signed.
+The information model therefore distinguishes data that must be validated from data that a profile allows to go unvalidated, and a validator never presents the latter as validated.<a href="#section-6.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="distribution">
+<section id="section-6.2">
+        <h3 id="name-discovery-and-distribution">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-discovery-and-distribution" class="section-name selfRef">Discovery and Distribution</a>
+        </h3>
+<p id="section-6.2-1">Emblems are published at names in the issuer's namespace.
+An issuer may place them beneath an underscored label <span>[<a href="#RFC8552" class="cite xref">RFC8552</a>]</span>, which lets it delegate that label to an authoritative server that serves only emblems (an emblem publisher) while the rest of its zone stays where it is.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-2">An asset that has a domain name, such as a network service, is identified by that name, as the charter requires <span>[<a href="#CHARTER" class="cite xref">CHARTER</a>]</span>.
+An asset without one (a bag, a pallet, a person) is given a name in the issuer's namespace, which the asset carries (printed, or stored in a tag) or which is otherwise made known to the validator.
+A validator retrieves the emblems at that name with an ordinary DNS query.
+Emblems under several profiles can share a name, and a validator selects those whose profiles it understands.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+<p id="section-6.2-3">If a profile ends up delivering data outside the DNS (data too large or too dynamic for it), a record in the emblem refers to the data and pins its digest (for fixed data) or its signing key (for data that changes), as DANE <span>[<a href="#RFC6698" class="cite xref">RFC6698</a>]</span> pins keys for TLS.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+<p id="section-6.2-4">For offline use, an emblem travels as a bundle: its records, any authorizations it needs, and the DNSSEC records that chain them to a trust anchor.
+A bundle can be carried on any suitable medium, and it is validated exactly as if its records had been queried.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authorization">
+<section id="section-6.3">
+        <h3 id="name-authorization">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-authorization" class="section-name selfRef">Authorization</a>
+        </h3>
+<p id="section-6.3-1">An authorization states that an issuer, named by its domain name, may issue emblems within a stated scope.
+The scope may be broad (any emblem under a given profile, for given purposes, during a given period) or narrow (emblems about one named asset), and may bind the issuer's keys.
+A validator checks that an authorization covers the particular emblem it is validating.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.3-2">An authorizing entity publishes its authorizations in its own zone, at names derived from the issuer's name, so that a validator can look them up.
+An issuer can also carry an authorization with its emblem, so that a validator need not contact the authorizing entity; this supports offline and undetectable validation.
+Either way, the authorizing entity ends an authorization by withdrawing it, and carried copies remain usable only until their signatures expire.<a href="#section-6.3-2" class="pilcrow">¶</a></p>
+<p id="section-6.3-3">Which authorizing entities a validator recognizes is a matter of policy.
+A profile may name a default set, but the validator decides.
+Several authorizing entities may authorize one issuer, including entities whose claims compete; the validator is given all of them and determines which it recognizes.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-4">Withdrawal and signature expiry are how authorizations account for the compromise of key material, as <span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> requires; a profile chooses lifetimes short enough for its use case.<a href="#section-6.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="validation">
+<section id="section-6.4">
+        <h3 id="name-validation">
+<a href="#section-6.4" class="section-number selfRef">6.4. </a><a href="#name-validation" class="section-name selfRef">Validation</a>
+        </h3>
+<p id="section-6.4-1">To validate an emblem, a validator establishes that:<a href="#section-6.4-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.4-2.1">
+            <p id="section-6.4-2.1.1">it is authentic: its DNSSEC chain validates from a trust anchor the validator holds;<a href="#section-6.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.4-2.2">
+            <p id="section-6.4-2.2.1">it applies: its subject identifiers match the asset in question;<a href="#section-6.4-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.4-2.3">
+            <p id="section-6.4-2.3.1">it is current: its asserted period and its signatures are both in effect;<a href="#section-6.4-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.4-2.4">
+            <p id="section-6.4-2.4.1">it is authorized, where its profile requires: an authorization from a recognized authorizing entity covers it; and<a href="#section-6.4-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.4-2.5">
+            <p id="section-6.4-2.5.1">it conforms to its profile.<a href="#section-6.4-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-6.4-3">The result is one of three:<a href="#section-6.4-3" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-6.4-4">
+          <dt id="section-6.4-4.1">
+<strong>Valid</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-6.4-4.2">
+            <p id="section-6.4-4.2.1">Every required check succeeded.<a href="#section-6.4-4.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-6.4-4.3">
+<strong>Invalid</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-6.4-4.4">
+            <p id="section-6.4-4.4.1">A check failed: a signature did not verify, the emblem does not apply to the asset, or no authorization from a recognized authorizing entity covers it where one is required.<a href="#section-6.4-4.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-6.4-4.5">
+<strong>Indeterminate</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-6.4-4.6">
+            <p id="section-6.4-4.6.1">Validation could not be completed: the DNS was unreachable, or the profile is unknown.<a href="#section-6.4-4.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-6.4-5">An indeterminate result is never presented as invalid, nor as valid.
+A validator that does not know an emblem's profile can still establish that the emblem is authentic, applies, and is current, and can present what it understands of the content without claiming that the emblem conforms to a profile.
+This is a further reason for types and code lists that many profiles need to be defined in the core architecture (<a href="#profiles" class="auto internal xref">Section 8</a>), rather than separately by each profile.
+Whatever the result, the validator learns who asserts what: the issuer's domain name, the authorizing entities that authorize it, and which of them it recognizes.<a href="#section-6.4-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="confidentiality">
+<section id="section-6.5">
+        <h3 id="name-confidentiality-and-selecti">
+<a href="#section-6.5" class="section-number selfRef">6.5. </a><a href="#name-confidentiality-and-selecti" class="section-name selfRef">Confidentiality and Selective Disclosure</a>
+        </h3>
+<p id="section-6.5-1">Some values are meant for some validators only.
+Approaches include:<a href="#section-6.5-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-6.5-2">
+          <dt id="section-6.5-2.1">
+<strong>Encrypted values</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-6.5-2.2">
+            <p id="section-6.5-2.2.1">The emblem carries values encrypted to named recipients.
+Everyone receives the same signed answer, which can be cached and carried offline, and no validator identifies itself; but the recipients must be known when the emblem is issued.<a href="#section-6.5-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-6.5-2.3">
+<strong>Disclosed values</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-6.5-2.4">
+            <p id="section-6.5-2.4.1">The emblem carries salted digests of values, and whoever accompanies the asset reveals values to a validator, who checks them against the digests.<a href="#section-6.5-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-6.5-3">Both keep a single signed emblem that every requester receives, so answers stay cacheable and portable, and no validator has to identify itself to the emblem publisher.
+Each profile chooses which values to protect and how, but the mechanisms are common to all profiles.<a href="#section-6.5-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="lifecycle">
+<section id="section-6.6">
+        <h3 id="name-lifecycle">
+<a href="#section-6.6" class="section-number selfRef">6.6. </a><a href="#name-lifecycle" class="section-name selfRef">Lifecycle</a>
+        </h3>
+<p id="section-6.6-1">Three periods govern an emblem:<a href="#section-6.6-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.6-2.1">
+            <p id="section-6.6-2.1.1">the period its assertions hold, which the issuer states;<a href="#section-6.6-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.6-2.2">
+            <p id="section-6.6-2.2.1">how long DNS caches may keep it, set by its time to live; and<a href="#section-6.6-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.6-2.3">
+            <p id="section-6.6-2.3.1">how long its signatures can be verified, which bounds how long a copy remains usable after the emblem is withdrawn.<a href="#section-6.6-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-6.6-3">A profile chooses signature lifetimes by weighing prompt withdrawal against offline use.
+A bundle remains usable only until the earliest expiration among all the signatures in its chain, including those of parent zones that the issuer does not control, and only for a validator with a reliable clock; a similar chain is carried in TLS by <span>[<a href="#RFC9102" class="cite xref">RFC9102</a>]</span>.<a href="#section-6.6-3" class="pilcrow">¶</a></p>
+<p id="section-6.6-4">An issuer replaces an emblem by publishing new records, and withdraws it by removing them.
+Once cached copies expire, a validator that queries receives authenticated denial of existence <span>[<a href="#RFC4035" class="cite xref">RFC4035</a>]</span>.<a href="#section-6.6-4" class="pilcrow">¶</a></p>
+<p id="section-6.6-5"><span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> requires some emblems to be removable, so that nobody can later determine that an emblem was ever applied.
+That requires the issuer's zone not to reveal its names.
+NSEC3 <span>[<a href="#RFC5155" class="cite xref">RFC5155</a>]</span> hashes names but does not prevent them from being guessed offline; online signing with minimally covering <span>[<a href="#RFC4470" class="cite xref">RFC4470</a>]</span> or compact <span>[<a href="#RFC9824" class="cite xref">RFC9824</a>]</span> denial of existence does.
+Removal cannot reach copies that validators already hold, nor records of past queries kept by resolvers or by collectors of DNS traffic.
+Conversely, a validator can keep the signed records it received as evidence that the emblem was signed for a period that included the time it received them, which supports the weakest level of proof of presence in <span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span>.
+A profile whose use case requires removability states what such retained copies may reveal.<a href="#section-6.6-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="trust">
+<section id="section-7">
+      <h2 id="name-trust-model">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-trust-model" class="section-name selfRef">Trust Model</a>
+      </h2>
+<p id="section-7-1">A validator must be able to establish who made a statement, and that it has not changed since.
+The architecture anchors this in DNSSEC <span>[<a href="#RFC9364" class="cite xref">RFC9364</a>]</span>.
+An issuer's emblems are signed with the keys of the zone that holds them, and those keys are authenticated by a chain of signatures from the DNS root, or from another trust anchor the validator holds (which is then trusted for every name beneath it), down through the parents of that zone.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-2">What each role must trust follows from this:<a href="#section-7-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7-3.1">
+          <p id="section-7-3.1.1">The validator trusts its trust anchors, and the operators of the zones above the issuer's name not to sign falsely for it.
+It does not need to trust resolvers, emblem publishers, or the networks between them, since DNSSEC lets it check what they deliver.<a href="#section-7-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-7-3.2">
+          <p id="section-7-3.2.1">The validator trusts the issuer for what the issuer asserts about its own assets, and, where the profile requires it, an authorizing entity it recognizes for the issuer's entitlement.<a href="#section-7-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-7-3.3">
+          <p id="section-7-3.3.1">The issuer and the authorizing entity trust whoever operates their zones and holds their signing keys.<a href="#section-7-3.3.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-7-4">The usual alternative, binding an issuer's key with a certificate from a certification authority in the validator's trust store, is not adequate for emblems.
+A trust store typically contains many certification authorities, any of which is technically able to issue a certificate for any name, and a certificate binds a key to whatever one of them vouched for rather than to an organization the validator can recognize.
+Trust stores have been subverted in practice: through compromised certification authorities <span>[<a href="#DIGINOTAR" class="cite xref">DIGINOTAR</a>]</span>, through intermediate certification authority keys generated so weakly that anyone could recover them <span>[<a href="#EMUDHRA" class="cite xref">EMUDHRA</a>]</span>, and through governments requiring users to install roots of their own <span>[<a href="#KAZAKHSTAN" class="cite xref">KAZAKHSTAN</a>]</span>.
+Transparency logs <span>[<a href="#RFC6962" class="cite xref">RFC6962</a>]</span> make misissuance detectable after the fact, but do not prevent it.
+Revocation needs a separate status mechanism, which validators have often been unable to reach or have not checked <span>[<a href="#REVOCATION" class="cite xref">REVOCATION</a>]</span>.<a href="#section-7-4" class="pilcrow">¶</a></p>
+<p id="section-7-5">Anchoring in DNSSEC, and distributing through the DNS, give the architecture the following properties.<a href="#section-7-5" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-7-6">
+        <dt id="section-7-6.1">
+<strong>The assertion is the name holder's</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-7-6.2">
+          <p id="section-7-6.2.1">A validated emblem is the statement of whoever holds the domain name, which a validator, or the person it serves, can associate with an organization or brand.<a href="#section-7-6.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-7-6.3">
+<strong>Subversion is confined</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-7-6.4">
+          <p id="section-7-6.4.1">Only the operators of the issuer's zone and of its parents, and those who can change its registration, can sign for the name or redirect it.
+This is still trust: a state that operates a top-level domain could forge or suppress emblems beneath it, and DNSSEC has no counterpart to transparency logs.
+An issuer can weigh this in choosing where its name sits.<a href="#section-7-6.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-7-6.5">
+<strong>Absence can be proven</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-7-6.6">
+          <p id="section-7-6.6.1">DNSSEC can prove that a name or a record does not exist <span>[<a href="#RFC4035" class="cite xref">RFC4035</a>]</span>.
+A validator can therefore distinguish the absence of an emblem from an answer that was blocked or stripped in transit, and a profile can give absence a meaning (<a href="#domain" class="auto internal xref">Section 4</a>).
+A proof of absence says nothing about the past, so it does not prevent an issuer from removing an emblem without trace (<span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span>, Removable).<a href="#section-7-6.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-7-6.7">
+<strong>Withdrawal is part of publication</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-7-6.8">
+          <p id="section-7-6.8.1">Withdrawing an emblem means removing or replacing its records; copies made earlier stop validating when their signatures expire.<a href="#section-7-6.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-7-6.9">
+<strong>It works offline</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-7-6.10">
+          <p id="section-7-6.10.1">An emblem carried in a bundle with its chain of signatures can be validated against a trust anchor the validator already holds.
+The signatures' validity periods bound both how long the bundle is usable and how long a withdrawn emblem can still be accepted this way (<a href="#lifecycle" class="auto internal xref">Section 6.6</a>).<a href="#section-7-6.10.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-7-6.11">
+<strong>Checking can be discreet</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-7-6.12">
+          <p id="section-7-6.12.1">A DNS query goes through a resolver, and reaches the issuer's servers only when the resolver has no cached answer.
+An issuer that wants to observe queries can defeat caching, so undetectable validation also relies on carried authorizations and bundles (<a href="#roles" class="auto internal xref">Section 5</a>).<a href="#section-7-6.12.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+<p id="section-7-7">Emblems and authorizations are both authenticated with DNSSEC.
+This architecture does not define an alternative root of trust for authorization; see <span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span>, Authorization.
+If a profile ends up delivering data outside the DNS, that data is bound to the DNS by a digest or key published in a signed record, so that the DNSSEC chain covers it too.<a href="#section-7-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="profiles">
+<section id="section-8">
+      <h2 id="name-profiles">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-profiles" class="section-name selfRef">Profiles</a>
+      </h2>
+<p id="section-8-1">Because an emblem is a dictionary of metadata (<a href="#info-model" class="auto internal xref">Section 6.1</a>), a profile is in essence a schema for that dictionary, for one or more use cases, together with the policy for validating emblems that follow it.
+<span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> also has a profile state how emblems are discovered and which validation and authorization mechanisms apply; in this architecture, those are choices among the options described in <a href="#components" class="auto internal xref">Section 6</a>, not new mechanisms.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-2">A profile has an identifier, and states:<a href="#section-8-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8-3.1">
+          <p id="section-8-3.1.1">the entries its emblems use, their value types and code lists, and which entries are required;<a href="#section-8-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-3.2">
+          <p id="section-8-3.2.1">which values are confidential, to whom, and by which approach (<a href="#confidentiality" class="auto internal xref">Section 6.5</a>);<a href="#section-8-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-3.3">
+          <p id="section-8-3.3.1">whether authorization is required, the default set of authorizing entities, and whether authorizations must be carried with the emblem;<a href="#section-8-3.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-3.4">
+          <p id="section-8-3.4.1">which validation patterns it supports (<a href="#roles" class="auto internal xref">Section 5</a>), with the threat models that <span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> requires for undetectable validation and removability;<a href="#section-8-3.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-3.5">
+          <p id="section-8-3.5.1">how emblem publishers respond to queries (<span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span>, Query Response);<a href="#section-8-3.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-3.6">
+          <p id="section-8-3.6.1">signature lifetimes, and what absence of an emblem means; and<a href="#section-8-3.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-3.7">
+          <p id="section-8-3.7.1">what a validator should do with each validation result.<a href="#section-8-3.7.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-8-4">A profile may define new entries, value types, and code lists, and may publish additional records at an emblem's name.
+It does not change how emblems are discovered, their anchoring in DNSSEC, or how their authenticity is established.
+Where a use case needs a mechanism that the architecture lacks, the mechanism should be added to the core architecture, so that later profiles share one mechanism rather than converging on the same choices only by convention.<a href="#section-8-4" class="pilcrow">¶</a></p>
+<p id="section-8-5"><a href="#tab-uses" class="auto internal xref">Table 1</a> shows what profiles for the use cases in <span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span> would need to express or choose.<a href="#section-8-5" class="pilcrow">¶</a></p>
+<span id="name-use-cases-and-what-their-pr"></span><div id="tab-uses">
+<table class="center" id="table-1">
+        <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-use-cases-and-what-their-pr" class="selfRef">Use cases and what their profiles need</a>
+        </caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Use case</th>
+            <th class="text-left" rowspan="1" colspan="1">What its profile expresses or chooses</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">IHL protective emblems</td>
+            <td class="text-left" rowspan="1" colspan="1">authorization by a competent authority; undetectable validation; removability</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Other IHL-related marks</td>
+            <td class="text-left" rowspan="1" colspan="1">organizations' own marks; civilian infrastructure categories</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Diplomatic pouches</td>
+            <td class="text-left" rowspan="1" colspan="1">authorization by the sending state; validation without stopping the pouch; validators' own records of validation</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">OPCW, IAEA, Basel</td>
+            <td class="text-left" rowspan="1" colspan="1">hazard classes and identifiers; consignor and consignee; staff protected as couriers</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Dangerous goods</td>
+            <td class="text-left" rowspan="1" colspan="1">UN numbers and marks</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Wood packaging</td>
+            <td class="text-left" rowspan="1" colspan="1">authorization by a national plant protection organization; absence is meaningful</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Customs</td>
+            <td class="text-left" rowspan="1" colspan="1">commodity codes, origin, and value confidential to customs</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Brands</td>
+            <td class="text-left" rowspan="1" colspan="1">registration of the mark; anti-counterfeiting checks by customs</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Civil aviation</td>
+            <td class="text-left" rowspan="1" colspan="1">identity, flight plan, and current position; a partly redacted manifest</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Peacekeepers</td>
+            <td class="text-left" rowspan="1" colspan="1">frequently changing position; point of contact; treatment of strays</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Press</td>
+            <td class="text-left" rowspan="1" colspan="1">marking of journalists and their equipment</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Wetlands</td>
+            <td class="text-left" rowspan="1" colspan="1">location; presence or absence of a designation</td>
+          </tr>
+        </tbody>
+      </table>
+</div>
+</section>
+</div>
+<div id="future">
+<section id="section-9">
+      <h2 id="name-future-work">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-future-work" class="section-name selfRef">Future Work</a>
+      </h2>
+<p id="section-9-1">Protocol documents are needed for:<a href="#section-9-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-9-2.1">
+          <p id="section-9-2.1.1">the emblem format and its record type;<a href="#section-9-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-9-2.2">
+          <p id="section-9-2.2.1">authorizations;<a href="#section-9-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-9-2.3">
+          <p id="section-9-2.3.1">bundles for offline validation; and<a href="#section-9-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-9-2.4">
+          <p id="section-9-2.4.1">the first profiles.<a href="#section-9-2.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-10">
+      <h2 id="name-security-considerations">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-10-1">This section follows <span>[<a href="#RFC3552" class="cite xref">RFC3552</a>]</span> in outline; <a href="#trust" class="auto internal xref">Section 7</a> describes the trust model on which it depends.<a href="#section-10-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-10-2">
+        <dt id="section-10-2.1">
+<strong>Forgery</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.2">
+          <p id="section-10-2.2.1">Forging an emblem requires the signing key of the issuer's zone or of one of its parents.
+Validators depend on those parents not to sign falsely for the issuer's name.<a href="#section-10-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.3">
+<strong>Replay</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.4">
+          <p id="section-10-2.4.1">A withdrawn emblem can be replayed until its signatures expire (<a href="#lifecycle" class="auto internal xref">Section 6.6</a>).
+A proof of absence can likewise be replayed, making a newly published emblem appear absent until the proof's signatures expire.<a href="#section-10-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.5">
+<strong>Misleading names</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.6">
+          <p id="section-10-2.6.1">Authentication shows who the issuer is, not that the issuer is who a person expects.
+An issuer can choose a name that resembles another's.
+Validators should present the issuer's name in a form people can check, and profiles that need more require authorization.<a href="#section-10-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.7">
+<strong>Compromised or coerced authorizing entities</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.8">
+          <p id="section-10-2.8.1">An authorizing entity can authorize an issuer it should not.
+A validator chooses which authorizing entities it recognizes, and competing authorizations are visible to it.<a href="#section-10-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.9">
+<strong>Downgrade</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.10">
+          <p id="section-10-2.10.1">An attacker can strip signatures or block answers.
+DNSSEC lets a validator detect both, so a validator does not treat a missing or unsigned answer as proof that no emblem exists.<a href="#section-10-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.11">
+<strong>Misuse as an intrusion detector</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.12">
+          <p id="section-10-2.12.1">If checking for an emblem is visible to the issuer, an emblem can alert its holder to reconnaissance (<span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span>).
+Undetectable validation (<a href="#roles" class="auto internal xref">Section 5</a>) mitigates this, within the threat model that each profile states (<span>[<a href="#DIEM-REQS" class="cite xref">DIEM-REQS</a>]</span>).<a href="#section-10-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.13">
+<strong>Denial of service</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.14">
+          <p id="section-10-2.14.1">An attacker can make emblem publishers unreachable.
+The result is indeterminate, not invalid, and bundles remain usable.<a href="#section-10-2.14.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="privacy-considerations">
+<section id="section-11">
+      <h2 id="name-privacy-considerations">
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-privacy-considerations" class="section-name selfRef">Privacy Considerations</a>
+      </h2>
+<p id="section-11-1">This section follows <span>[<a href="#RFC6973" class="cite xref">RFC6973</a>]</span> in outline.<a href="#section-11-1" class="pilcrow">¶</a></p>
+<p id="section-11-2">DNS queries reveal a validator's interest to its resolver, and, for the names they serve, to the issuer's servers and those of authorizing entities.
+A validator limits this by querying through a shared resolver, by obtaining authorizations carried with the emblem, and by validating bundles offline (<a href="#roles" class="auto internal xref">Section 5</a>).<a href="#section-11-2" class="pilcrow">¶</a></p>
+<p id="section-11-3">Names can reveal assets.
+An issuer avoids names that describe what they mark, and keeps its zone from being enumerated (<a href="#lifecycle" class="auto internal xref">Section 6.6</a>), so that a list of protected assets cannot be read from the DNS.<a href="#section-11-3" class="pilcrow">¶</a></p>
+<p id="section-11-4">Emblems can reveal more than their holders intend.
+Values meant for some validators only are protected as described in <a href="#confidentiality" class="auto internal xref">Section 6.5</a>.
+Anything carried on an asset, such as a bundle in a tag, can be read by anyone with access to the asset.<a href="#section-11-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-12">
+      <h2 id="name-iana-considerations">
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-12-1">This document has no IANA actions.<a href="#section-12-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-13">
+      <h2 id="name-informative-references">
+<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+      </h2>
+<dl class="references">
+<dt id="CHARTER">[CHARTER]</dt>
+      <dd>
+<span class="refTitle">"Digital Emblems"</span>, <time datetime="2025-05-27" class="refDate">27 May 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/charter-ietf-diem/01/">https://datatracker.ietf.org/doc/charter-ietf-diem/01/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="DIEM-REQS">[DIEM-REQS]</dt>
+      <dd>
+<span class="refAuthor">Fainchtein, R. A.</span>, <span class="refAuthor">Linker, F.</span>, <span class="refAuthor">Rosenberg, A.</span>, <span class="refAuthor">Deccio, C.</span>, and <span class="refAuthor">A. Mankin</span>, <span class="refTitle">"Digital Emblems - Use Cases and Requirements"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-diem-requirements-05</span>, <time datetime="2026-11-01" class="refDate">1 November 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-diem-requirements-05">https://datatracker.ietf.org/doc/html/draft-ietf-diem-requirements-05</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="DIGINOTAR">[DIGINOTAR]</dt>
+      <dd>
+<span class="refAuthor">Fox-IT</span>, <span class="refTitle">"Black Tulip: Report of the investigation into the DigiNotar Certificate Authority breach"</span>, <time datetime="2012-08-13" class="refDate">13 August 2012</time>, <span>&lt;<a href="https://zoek.officielebekendmakingen.nl/blg-191225.pdf">https://zoek.officielebekendmakingen.nl/blg-191225.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="EMUDHRA">[EMUDHRA]</dt>
+      <dd>
+<span class="refAuthor">Mozilla</span>, <span class="refTitle">"eMudhra: Private key compromise of Intermediate Certificates"</span>, <span class="seriesInfo">Mozilla Bugzilla Bug 2083449</span>, <time datetime="2026-10-18" class="refDate">18 October 2026</time>, <span>&lt;<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2083449">https://bugzilla.mozilla.org/show_bug.cgi?id=2083449</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="ISPM15">[ISPM15]</dt>
+      <dd>
+<span class="refAuthor">International Plant Protection Convention</span>, <span class="refTitle">"International Standards for Phytosanitary Measures No. 15: Regulation of Wood Packaging Material in International Trade"</span>, <time datetime="2019" class="refDate">2019</time>, <span>&lt;<a href="https://www.ippc.int/static/media/files/publication/en/2019/02/ISPM_15_2018_En_WoodPackaging_Post-CPM13_Rev_Annex1and2_Fixed_2019-02-01.pdf">https://www.ippc.int/static/media/files/publication/en/2019/02/ISPM_15_2018_En_WoodPackaging_Post-CPM13_Rev_Annex1and2_Fixed_2019-02-01.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="KAZAKHSTAN">[KAZAKHSTAN]</dt>
+      <dd>
+<span class="refAuthor">Mozilla</span>, <span class="refTitle">"Protecting our Users in Kazakhstan"</span>, <time datetime="2019-08-21" class="refDate">21 August 2019</time>, <span>&lt;<a href="https://blog.mozilla.org/security/2019/08/21/protecting-our-users-in-kazakhstan/">https://blog.mozilla.org/security/2019/08/21/protecting-our-users-in-kazakhstan/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="REVOCATION">[REVOCATION]</dt>
+      <dd>
+<span class="refAuthor">Liu, Y.</span>, <span class="refAuthor">Tome, W.</span>, <span class="refAuthor">Zhang, L.</span>, <span class="refAuthor">Choffnes, D.</span>, <span class="refAuthor">Levin, D.</span>, <span class="refAuthor">Maggs, B.</span>, <span class="refAuthor">Mislove, A.</span>, <span class="refAuthor">Schulman, A.</span>, and <span class="refAuthor">C. Wilson</span>, <span class="refTitle">"An End-to-End Measurement of Certificate Revocation in the Web's PKI"</span>, <span class="seriesInfo">Proceedings of the Internet Measurement Conference 2015</span>, <span class="seriesInfo">DOI 10.1145/2815675.2815685</span>, <time datetime="2015-10" class="refDate">October 2015</time>, <span>&lt;<a href="https://doi.org/10.1145/2815675.2815685">https://doi.org/10.1145/2815675.2815685</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3552">[RFC3552]</dt>
+      <dd>
+<span class="refAuthor">Rescorla, E.</span> and <span class="refAuthor">B. Korver</span>, <span class="refTitle">"Guidelines for Writing RFC Text on Security Considerations"</span>, <span class="seriesInfo">BCP 72</span>, <span class="seriesInfo">RFC 3552</span>, <span class="seriesInfo">DOI 10.17487/RFC3552</span>, <time datetime="2003-07" class="refDate">July 2003</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3552">https://www.rfc-editor.org/rfc/rfc3552</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4033">[RFC4033]</dt>
+      <dd>
+<span class="refAuthor">Arends, R.</span>, <span class="refAuthor">Austein, R.</span>, <span class="refAuthor">Larson, M.</span>, <span class="refAuthor">Massey, D.</span>, and <span class="refAuthor">S. Rose</span>, <span class="refTitle">"DNS Security Introduction and Requirements"</span>, <span class="seriesInfo">RFC 4033</span>, <span class="seriesInfo">DOI 10.17487/RFC4033</span>, <time datetime="2005-03" class="refDate">March 2005</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4033">https://www.rfc-editor.org/rfc/rfc4033</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4035">[RFC4035]</dt>
+      <dd>
+<span class="refAuthor">Arends, R.</span>, <span class="refAuthor">Austein, R.</span>, <span class="refAuthor">Larson, M.</span>, <span class="refAuthor">Massey, D.</span>, and <span class="refAuthor">S. Rose</span>, <span class="refTitle">"Protocol Modifications for the DNS Security Extensions"</span>, <span class="seriesInfo">RFC 4035</span>, <span class="seriesInfo">DOI 10.17487/RFC4035</span>, <time datetime="2005-03" class="refDate">March 2005</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4035">https://www.rfc-editor.org/rfc/rfc4035</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4470">[RFC4470]</dt>
+      <dd>
+<span class="refAuthor">Weiler, S.</span> and <span class="refAuthor">J. Ihren</span>, <span class="refTitle">"Minimally Covering NSEC Records and DNSSEC On-line Signing"</span>, <span class="seriesInfo">RFC 4470</span>, <span class="seriesInfo">DOI 10.17487/RFC4470</span>, <time datetime="2006-04" class="refDate">April 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4470">https://www.rfc-editor.org/rfc/rfc4470</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5155">[RFC5155]</dt>
+      <dd>
+<span class="refAuthor">Laurie, B.</span>, <span class="refAuthor">Sisson, G.</span>, <span class="refAuthor">Arends, R.</span>, and <span class="refAuthor">D. Blacka</span>, <span class="refTitle">"DNS Security (DNSSEC) Hashed Authenticated Denial of Existence"</span>, <span class="seriesInfo">RFC 5155</span>, <span class="seriesInfo">DOI 10.17487/RFC5155</span>, <time datetime="2008-03" class="refDate">March 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5155">https://www.rfc-editor.org/rfc/rfc5155</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6698">[RFC6698]</dt>
+      <dd>
+<span class="refAuthor">Hoffman, P.</span> and <span class="refAuthor">J. Schlyter</span>, <span class="refTitle">"The DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS) Protocol: TLSA"</span>, <span class="seriesInfo">RFC 6698</span>, <span class="seriesInfo">DOI 10.17487/RFC6698</span>, <time datetime="2012-08" class="refDate">August 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6698">https://www.rfc-editor.org/rfc/rfc6698</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6962">[RFC6962]</dt>
+      <dd>
+<span class="refAuthor">Laurie, B.</span>, <span class="refAuthor">Langley, A.</span>, and <span class="refAuthor">E. Kasper</span>, <span class="refTitle">"Certificate Transparency"</span>, <span class="seriesInfo">RFC 6962</span>, <span class="seriesInfo">DOI 10.17487/RFC6962</span>, <time datetime="2013-06" class="refDate">June 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6962">https://www.rfc-editor.org/rfc/rfc6962</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6973">[RFC6973]</dt>
+      <dd>
+<span class="refAuthor">Cooper, A.</span>, <span class="refAuthor">Tschofenig, H.</span>, <span class="refAuthor">Aboba, B.</span>, <span class="refAuthor">Peterson, J.</span>, <span class="refAuthor">Morris, J.</span>, <span class="refAuthor">Hansen, M.</span>, and <span class="refAuthor">R. Smith</span>, <span class="refTitle">"Privacy Considerations for Internet Protocols"</span>, <span class="seriesInfo">RFC 6973</span>, <span class="seriesInfo">DOI 10.17487/RFC6973</span>, <time datetime="2013-07" class="refDate">July 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6973">https://www.rfc-editor.org/rfc/rfc6973</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8552">[RFC8552]</dt>
+      <dd>
+<span class="refAuthor">Crocker, D.</span>, <span class="refTitle">"Scoped Interpretation of DNS Resource Records through "Underscored" Naming of Attribute Leaves"</span>, <span class="seriesInfo">BCP 222</span>, <span class="seriesInfo">RFC 8552</span>, <span class="seriesInfo">DOI 10.17487/RFC8552</span>, <time datetime="2019-03" class="refDate">March 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8552">https://www.rfc-editor.org/rfc/rfc8552</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9102">[RFC9102]</dt>
+      <dd>
+<span class="refAuthor">Dukhovni, V.</span>, <span class="refAuthor">Huque, S.</span>, <span class="refAuthor">Toorop, W.</span>, <span class="refAuthor">Wouters, P.</span>, and <span class="refAuthor">M. Shore</span>, <span class="refTitle">"TLS DNSSEC Chain Extension"</span>, <span class="seriesInfo">RFC 9102</span>, <span class="seriesInfo">DOI 10.17487/RFC9102</span>, <time datetime="2021-08" class="refDate">August 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9102">https://www.rfc-editor.org/rfc/rfc9102</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9364">[RFC9364]</dt>
+      <dd>
+<span class="refAuthor">Hoffman, P.</span>, <span class="refTitle">"DNS Security Extensions (DNSSEC)"</span>, <span class="seriesInfo">BCP 237</span>, <span class="seriesInfo">RFC 9364</span>, <span class="seriesInfo">DOI 10.17487/RFC9364</span>, <time datetime="2023-02" class="refDate">February 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9364">https://www.rfc-editor.org/rfc/rfc9364</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9499">[RFC9499]</dt>
+      <dd>
+<span class="refAuthor">Hoffman, P.</span> and <span class="refAuthor">K. Fujiwara</span>, <span class="refTitle">"DNS Terminology"</span>, <span class="seriesInfo">BCP 219</span>, <span class="seriesInfo">RFC 9499</span>, <span class="seriesInfo">DOI 10.17487/RFC9499</span>, <time datetime="2024-03" class="refDate">March 2024</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9499">https://www.rfc-editor.org/rfc/rfc9499</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9824">[RFC9824]</dt>
+    <dd>
+<span class="refAuthor">Huque, S.</span>, <span class="refAuthor">Elmerot, C.</span>, and <span class="refAuthor">O. Gudmundsson</span>, <span class="refTitle">"Compact Denial of Existence in DNSSEC"</span>, <span class="seriesInfo">RFC 9824</span>, <span class="seriesInfo">DOI 10.17487/RFC9824</span>, <time datetime="2025-09" class="refDate">September 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9824">https://www.rfc-editor.org/rfc/rfc9824</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-A">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-A-1">To be written.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-B">
+      <h2 id="name-authors-address">
+<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Alex Rosenberg</span></div>
+<div dir="auto" class="left"><span class="org">Veridigo</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:alexr@veridigo.com" class="email">alexr@veridigo.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
