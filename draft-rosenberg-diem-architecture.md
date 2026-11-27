@@ -38,19 +38,6 @@ informative:
     target: https://datatracker.ietf.org/doc/charter-ietf-diem/01/
     title: Digital Emblems
     date: 2025-05-27
-  RFC3552:
-  RFC4033:
-  RFC5155:
-  RFC6698:
-  RFC6973:
-  RFC8552:
-  RFC9364:
-  RFC4035:
-  RFC4470:
-  RFC6962:
-  RFC9102:
-  RFC9824:
-  RFC9499:
   ISPM15:
     target: https://www.ippc.int/static/media/files/publication/en/2019/02/ISPM_15_2018_En_WoodPackaging_Post-CPM13_Rev_Annex1and2_Fixed_2019-02-01.pdf
     title: "International Standards for Phytosanitary Measures No. 15: Regulation of Wood Packaging Material in International Trade"
@@ -109,18 +96,17 @@ Their digital counterparts must do the same for assets that people and software 
 {{DIEM-REQS}} sets out the use cases and the requirements they share.
 
 A digital emblem, as this architecture describes it, is a statement about an asset made by the holder of a domain name.
-The holder publishes the emblem in the DNS.
-A validator finds it with an ordinary DNS query and checks it with DNSSEC {{RFC4033}}, which tells the validator which domain name holder made the statement and that the statement has not been altered.
-Where a use case requires it, a separate authorizing entity confirms, in its own part of the DNS, that the issuer is entitled to make the statement.
-What the statement means is set by a profile, which describes the content of emblems for one or more use cases.
+Where a use case requires it, a separate authorizing entity confirms that the issuer is entitled to make the statement.
+Profiles determine the semantics and contents of these statements, and profile will generally cover one or more use cases.
+Holders publish emblems in the DNS either directly via dedicated resource records or indirectly via a record that points to an emblem service.
+Thus, validators can discover emblems with an ordinary DNS query.
 
 This document describes the roles involved, the components that connect them, how trust is anchored, and how profiles accommodate individual use cases.
 It is the basis for protocol documents that will specify encodings, record types, and procedures, and for profile documents that will specify the content of emblems for particular use cases.
-It does not itself specify any of these.
 
 # Terminology
 
-This document uses the terms asset, digital emblem (or emblem), and validation as {{DIEM-REQS}} defines them, and DNS terms as {{RFC9499}} defines them.
+This document uses the terms asset, digital emblem (or emblem), and validation as {{DIEM-REQS}} defines them, and DNS terms as {{?RFC9499}} defines them.
 It uses the term profile for what {{DIEM-REQS}} calls a digital emblem profile, with the narrower scope described in {{profiles}}.
 It refines the {{DIEM-REQS}} terms emblem issuer, authorizing entity, and validator by what each produces and consumes, and adds the other terms below.
 
@@ -139,90 +125,44 @@ It refines the {{DIEM-REQS}} terms emblem issuer, authorizing entity, and valida
 : A statement by an authorizing entity that an issuer may issue emblems of a stated scope (for example, a profile, the purposes it may claim, and a period).
 
 **Validator**:
-: Consumes emblems, authorizations, and the DNSSEC data that authenticates them.
-  Produces a result: valid, invalid, or indeterminate.
+: Consumes emblems, authorizations, and associated validation data.
 
 **Bundle**:
-: An emblem together with the DNSSEC records needed to validate it, carried so that it can be validated without querying the DNS.
-
-# Design Principles {#principles}
-
-The architecture follows these principles.
-Each is a choice among alternatives that have been discussed in the working group, and the rest of the document depends on them.
-
-**Use the DNS**:
-: Emblems are discovered, distributed, and authenticated with the DNS wherever it can do the job.
-  If a profile ends up delivering data outside the DNS, that data is referred to, and its integrity pinned, from a DNSSEC-signed record.
-
-**The assertion belongs to the name holder**:
-: An emblem is a statement made by whoever controls a domain name: an organization, a brand, an authority.
-  Trust follows the namespace, through DNSSEC {{RFC4033}}, rather than through any of the many certification authorities that a trust store contains.
-  A validator therefore learns who is making the statement, not only that some certification authority vouched for a key.
-
-**One validation model**:
-: Establishing that an emblem is authentic, authorized, and current works the same way for every use case.
-  A validator should not need software specific to a use case to do it, so that general-purpose software (including web browsers) can validate and display emblems.
-
-**Profiles describe content, not protocol**:
-: Use cases differ in what their emblems say, not in how emblems are found or trusted.
-  A profile is mainly a schema.
-  Where a use case needs a mechanism, the mechanism belongs in the common architecture, so that every use case can rely on it.
-
-**Undetectable validation**:
-: Checking an emblem should reveal as little as possible about who is checking, and to whom, because in several use cases the pattern of checks is itself sensitive.
+: An emblem together with associated validation data.
 
 # Domain Model {#domain}
 
 An emblem is a statement by an issuer about an asset, its subject.
 The subject may be a single item or a composite (a consignment, a convoy) whose parts carry emblems of their own.
-The subject is the thing the statement is about: for a hospital's records service, the service, not the host it runs on; for a diplomatic bag, the bag, not the courier carrying it.
-An emblem identifies its subject, and may carry further identifiers (a seal number, a serial number) that a validator can compare with what is in front of it.
+The subject is the thing the statement is about, for example, a hospital's records service or a diplomatic bag.
 
-An emblem makes assertions about its subject.
-Some describe it (what it is, who operates it, what it contains).
-Some ask something of whoever reads the emblem: not to attack, not to open, to handle with care, to report.
-The architecture calls these requests treatment.
-An emblem may cite the law, agreement, or standard on which its assertions rest, and may name a visual mark that a person can be shown alongside the result.
-
-An emblem states the period during which its assertions hold.
-It can be withdrawn before the period ends, and it can be replaced.
-This period is part of what the issuer asserts; it is distinct from how long the DNS may cache the emblem and from how long its signatures can be verified ({{lifecycle}}).
-
-In some use cases anyone may issue an emblem about their own asset, and a validator needs to know only who the issuer is.
+In some use cases anyone may issue an emblem about their own asset.
 In others the issuer must be authorized: a ministry of health authorizes a hospital to use a protective emblem, or a national plant protection organization authorizes a producer to mark wood packaging {{ISPM15}}.
-More than one authorizing entity may authorize the same issuer, including entities whose claims compete (two states that both claim the territory where a hospital stands), and a validator decides which it recognizes.
+More than one authorizing entity may authorize the same issuer and a validator decides which it recognizes.
 
-One asset may carry emblems under several profiles at once: a shipment may carry customs data, dangerous goods data, and recycling data, each described by a different profile and read by a different validator.
+One asset may carry emblems under several profiles at once: a shipment may carry customs data, dangerous goods data, and recycling data, each potentially described by a different profile and read by a different validator.
 An emblem may also refer to other emblems (a consignment to the products it contains).
 Each referenced emblem remains the statement of its own issuer and is validated on its own; a reference may pin the version it refers to.
 
 Some of what an emblem says may be meant for some validators only: the value of a shipment for customs, the identity of a courier for the receiving state.
 
-An emblem does not create the status it signals.
-Protection under international humanitarian law, for example, exists in law whether or not an emblem is displayed, so there the absence of an emblem does not mean the absence of protection.
-In other use cases absence does carry meaning (wood packaging without a compliance mark may be refused entry), and each profile says what absence means for it.
-The architecture does not decide who is entitled to issue or authorize emblems; that is for the frameworks behind each use case.
-It does not enforce treatment; it lets a validator learn, reliably, what is asked and by whom.
-
-# Roles and Interactions {#roles}
+## Roles and Interactions {#roles}
 
 {{fig-roles}} shows the roles and what passes between them.
 
 ~~~ ascii-art
++--------------------+
+|   Emblem issuer    |
++---------+----------+
+          | issues
+          | emblem
+          v
 +--------------------+              +--------------------+
-|   Emblem issuer    |              | Authorizing entity |
-|  (its own zone)    |              |  (its own zone)    |
+|  Emblem publisher  |              | Authorizing entity |
 +---------+----------+              +---------+----------+
-          | publishes                         | publishes
-          | emblem                            | authorization
-          v                                   v
-+--------------------+              +--------------------+
-|  Emblem publisher  |              |  DNS, signed with  |
-|  (DNS, DNSSEC)     |              |  DNSSEC            |
-+---------+----------+              +---------+----------+
-          | emblem                            | authorization
+          |  publishes emblem                 | authorization
           | (queried, or                      | (queried, or
-          |  carried in                       |  carried with
+          |  carried in                       |  bundled with
           |  a bundle)                        |  the emblem)
           |        +---------------+          |
           +------->|   Validator   |<---------+
@@ -237,27 +177,11 @@ It does not enforce treatment; it lets a validator learn, reliably, what is aske
 ~~~
 {: #fig-roles title="Roles and what passes between them"}
 
-The issuer wants its assertions about its asset to be found and accepted as authentic by those they are meant for, and not read by others where they are confidential.
-The authorizing entity wants its authorization to be relied on for the scope it granted and no further, and to be able to end it.
+The issuer wants assertions about its asset to be found and accepted by relevant validators.
+The authorizing entity wants its authorization to be valid only for a particular scope, and to be able to end it.
 The validator wants to learn, reliably and without revealing more than necessary about itself, what is asserted about an asset and by whom.
-The emblem publisher serves records; it need not be trusted for their integrity, because what it serves is signed by the issuer (unless the issuer has it sign on its behalf), although it can see queries and withhold answers.
-The person or system acting on the result decides what to do; the architecture informs that decision but does not make it.
-
-These are roles, not organizations.
-An issuer may run its own emblem publisher or delegate that to a provider.
-An authorizing entity may also be the issuer of its own emblems.
-A validator may be a person with a handheld device, a program scanning a network, or a service acting for others.
-
-Validation happens in three patterns, which a single validator may combine:
-
-**Online**:
-: The validator queries the DNS for the emblem and any authorization it needs, through a resolver of its choice.
-
-**Offline**:
-: The validator receives a bundle (from a suitable storage medium such as a tag, a code, a file, or other mechanism) and validates it without network access, against trust anchors it already holds.
-
-**Undetectable**:
-: The validator obtains what it needs in a way that does not reveal its interest to the issuer or the authorizing entity, for example because the authorization is carried with the emblem and the query reaches the emblem publisher only through a shared resolver.
+The emblem publisher serves emblems, potentially as a service that is designed in the DNS.
+Depending on concrete operation, the publisher or issuer will sign the emblems.
 
 # Components {#components}
 
@@ -267,164 +191,73 @@ Encodings, record types, and procedures are left to protocol documents.
 ## Emblem Information Model {#info-model}
 
 An emblem is a dictionary of metadata about its subject: a set of entries, each pairing a name with a typed value.
-Profiles are schemas for that dictionary ({{profiles}}).
-The architecture defines only what every emblem must be able to carry:
+Profiles define an emblem's semantics and which data may be stored in the emblem ({{profiles}}), e.g., an emblem may cite the law, agreement, or standard on which its assertions rest, and may name a visual mark that a person can be shown alongside the result.
+All emblems, though, carry:
 
-* the identifiers of its subject;
-* the profile or profiles it follows;
-* the period during which its assertions hold;
-* references to related emblems; and
+* a subject and further identifiers (a seal number, a serial number) that a validator can use for the marked asset,
+* a profile,
+* a validity period,
+* references to related emblems, and
 * values that are confidential to some validators ({{confidentiality}}).
 
-Everything else, such as treatment or the legal basis that an emblem under international humanitarian law cites, is defined by profiles.
-The issuer is not an entry, because it is established by the domain name at which the emblem is published.
+Values are typed, and where possible drawn from types and code lists shared across profiles, so that a validator without software specific to a profile can still validate an emblem and present its content in a generic form.
 
-Values are typed, and where possible drawn from types and code lists shared across profiles, so that a validator without software specific to a profile can still authenticate an emblem and present its content in a generic form.
+The architecture will encode emblems in an existing message format that facilitates signing and encryption, which lowers the implementation burden.
+Many such message formats exist, e.g., JSON Web Tokens (JWTs) {{?RFC7519}} or CBOR Web Tokens {{?RFC8392}}.
 
 {{DIEM-REQS}} lets a profile require validation of all of an emblem's data or only a defined subset, so that frequently changing data need not be re-signed.
-The information model therefore distinguishes data that must be validated from data that a profile allows to go unvalidated, and a validator never presents the latter as validated.
+The information model therefore distinguishes data that must be validated from data may be unvalidated.
 
 ## Discovery and Distribution {#distribution}
 
-Emblems are published at names in the issuer's namespace.
-An issuer may place them beneath an underscored label {{RFC8552}}, which lets it delegate that label to an authoritative server that serves only emblems (an emblem publisher) while the rest of its zone stays where it is.
+Emblems are published in DNS zones or via emblem services.
+In general, emblems come in bundles that include all relevant data to validate them.
+Depending on the profile, the emblem or records pointing to an emblem service may be placed at underscore labels {{?RFC8552}}, which enables delegating emblem distribution to particular name servers.
 
-An asset that has a domain name, such as a network service, is identified by that name, as the charter requires {{CHARTER}}.
-An asset without one (a bag, a pallet, a person) is given a name in the issuer's namespace, which the asset carries (printed, or stored in a tag) or which is otherwise made known to the validator.
-A validator retrieves the emblems at that name with an ordinary DNS query.
-Emblems under several profiles can share a name, and a validator selects those whose profiles it understands.
-
-If a profile ends up delivering data outside the DNS (data too large or too dynamic for it), a record in the emblem refers to the data and pins its digest (for fixed data) or its signing key (for data that changes), as DANE {{RFC6698}} pins keys for TLS.
-
-For offline use, an emblem travels as a bundle: its records, any authorizations it needs, and the DNSSEC records that chain them to a trust anchor.
-A bundle can be carried on any suitable medium, and it is validated exactly as if its records had been queried.
+How a validator discovers an asset's name is outside the scope of the architecture, and we assume that validators determine asset names out-of-band.
+For example, networked services naturally have names, and other assets, such as a bag, a pallet, or a person, may carry a physical indicator of the respective name.
 
 ## Authorization {#authorization}
 
-An authorization states that an issuer, named by its domain name, may issue emblems within a stated scope.
+An authorization states that an issuer may issue emblems within a stated scope.
 The scope may be broad (any emblem under a given profile, for given purposes, during a given period) or narrow (emblems about one named asset), and may bind the issuer's keys.
 A validator checks that an authorization covers the particular emblem it is validating.
 
-An authorizing entity publishes its authorizations in its own zone, at names derived from the issuer's name, so that a validator can look them up.
-An issuer can also carry an authorization with its emblem, so that a validator need not contact the authorizing entity; this supports offline and undetectable validation.
-Either way, the authorizing entity ends an authorization by withdrawing it, and carried copies remain usable only until their signatures expire.
-
-Which authorizing entities a validator recognizes is a matter of policy.
-A profile may name a default set, but the validator decides.
+Which authorizing entities a validator recognizes is a matter of policy, but profiles may name a default set.
 Several authorizing entities may authorize one issuer, including entities whose claims compete; the validator is given all of them and determines which it recognizes.
-
-Withdrawal and signature expiry are how authorizations account for the compromise of key material, as {{DIEM-REQS}} requires; a profile chooses lifetimes short enough for its use case.
 
 ## Validation {#validation}
 
-To validate an emblem, a validator establishes that:
+Profiles specify how emblems are validated, as particular validation requirements as well as trust anchor choices depend on use case details.
+The architecture allows for two validation mechanism:
 
-* it is authentic: its DNSSEC chain validates from a trust anchor the validator holds;
-* it applies: its subject identifiers match the asset in question;
-* it is current: its asserted period and its signatures are both in effect;
-* it is authorized, where its profile requires: an authorization from a recognized authorizing entity covers it; and
-* it conforms to its profile.
+- *Direct validation*, via the emblem message format that supports message signing ({{authorization}}), or
+- *transport validation*, via the emblem's transport protocol.
+  For example, unsigned emblems may be delivered as DNSSEC-signed records {{?RFC9364}}, or emblem services may use TLS {{?RFC9846}} for transport and DANE {{?RFC7671}} for authenticating the TLS connection.
 
-The result is one of three:
-
-**Valid**:
-: Every required check succeeded.
-
-**Invalid**:
-: A check failed: a signature did not verify, the emblem does not apply to the asset, or no authorization from a recognized authorizing entity covers it where one is required.
-
-**Indeterminate**:
-: Validation could not be completed: the DNS was unreachable, or the profile is unknown.
-
-An indeterminate result is never presented as invalid, nor as valid.
-A validator that does not know an emblem's profile can still establish that the emblem is authentic, applies, and is current, and can present what it understands of the content without claiming that the emblem conforms to a profile.
-This is a further reason for types and code lists that many profiles need to be defined in the core architecture ({{profiles}}), rather than separately by each profile.
-Whatever the result, the validator learns who asserts what: the issuer's domain name, the authorizing entities that authorize it, and which of them it recognizes.
+Emblem bundles facilitate offline and undetectable validation.
+A bundle allows validation without further network access or offline after the bundle was cached or obtained via other, currently out-of-scope transport mechanisms.
+Furthermore, bundles allow emblem validation without further follow-up queries, which facilitates undetectable validation.
 
 ## Confidentiality and Selective Disclosure {#confidentiality}
 
-Some values are meant for some validators only.
-Approaches include:
-
-**Encrypted values**:
-: The emblem carries values encrypted to named recipients.
-  Everyone receives the same signed answer, which can be cached and carried offline, and no validator identifies itself; but the recipients must be known when the emblem is issued.
-
-**Disclosed values**:
-: The emblem carries salted digests of values, and whoever accompanies the asset reveals values to a validator, who checks them against the digests.
-
-Both keep a single signed emblem that every requester receives, so answers stay cacheable and portable, and no validator has to identify itself to the emblem publisher.
-Each profile chooses which values to protect and how, but the mechanisms are common to all profiles.
-
-## Lifecycle {#lifecycle}
-
-Three periods govern an emblem:
-
-* the period its assertions hold, which the issuer states;
-* how long DNS caches may keep it, set by its time to live; and
-* how long its signatures can be verified, which bounds how long a copy remains usable after the emblem is withdrawn.
-
-A profile chooses signature lifetimes by weighing prompt withdrawal against offline use.
-A bundle remains usable only until the earliest expiration among all the signatures in its chain, including those of parent zones that the issuer does not control, and only for a validator with a reliable clock; a similar chain is carried in TLS by {{RFC9102}}.
-
-An issuer replaces an emblem by publishing new records, and withdraws it by removing them.
-Once cached copies expire, a validator that queries receives authenticated denial of existence {{RFC4035}}.
-
-{{DIEM-REQS}} requires some emblems to be removable, so that nobody can later determine that an emblem was ever applied.
-That requires the issuer's zone not to reveal its names.
-NSEC3 {{RFC5155}} hashes names but does not prevent them from being guessed offline; online signing with minimally covering {{RFC4470}} or compact {{RFC9824}} denial of existence does.
-Removal cannot reach copies that validators already hold, nor records of past queries kept by resolvers or by collectors of DNS traffic.
-Conversely, a validator can keep the signed records it received as evidence that the emblem was signed for a period that included the time it received them, which supports the weakest level of proof of presence in {{DIEM-REQS}}.
-A profile whose use case requires removability states what such retained copies may reveal.
+The generic emblem message format will support encryption and selective disclosure mechanisms for the emblem itself.
+For example, {{?RFC9901}} specifies selective disclosure for JWTs and {{?I-D.spice-sd-cwt}} specifies selective disclosure for CWTs.
+Selective disclosure can also occur via an emblem service which can authenticate validators prior to delivering emblems.
+Profiles choose which values to protect and how, but the mechanisms are common to all profiles.
 
 # Trust Model {#trust}
 
-A validator must be able to establish who made a statement, and that it has not changed since.
-The architecture anchors this in DNSSEC {{RFC9364}}.
-An issuer's emblems are signed with the keys of the zone that holds them, and those keys are authenticated by a chain of signatures from the DNS root, or from another trust anchor the validator holds (which is then trusted for every name beneath it), down through the parents of that zone.
+The architecture supports authenticating emblem issuers and authorizing entities.
 
-What each role must trust follows from this:
+For emblem profiles that use transport validation (see {{validation}}), authentication of issuers is straightforward.
+For example, when relying on DNSSEC {{?RFC9364}} for validation, emblems are signed with the keys of the zone that holds them, and those keys are authenticated by a chain of signatures from the DNS root.
 
-* The validator trusts its trust anchors, and the operators of the zones above the issuer's name not to sign falsely for it.
-  It does not need to trust resolvers, emblem publishers, or the networks between them, since DNSSEC lets it check what they deliver.
-* The validator trusts the issuer for what the issuer asserts about its own assets, and, where the profile requires it, an authorizing entity it recognizes for the issuer's entitlement.
-* The issuer and the authorizing entity trust whoever operates their zones and holds their signing keys.
+For emblem profiles that use direct validation (see {{validation}}), authentication of issuers requires domain-specific mechanisms.
+The architecture encourages profiles to use message format authentication mechanisms wherever possible, e.g., signed JWTs support authenticating an issuer via X.509 certificates (see {{?RFC7515}}).
 
-The usual alternative, binding an issuer's key with a certificate from a certification authority in the validator's trust store, is not adequate for emblems.
-A trust store typically contains many certification authorities, any of which is technically able to issue a certificate for any name, and a certificate binds a key to whatever one of them vouched for rather than to an organization the validator can recognize.
-Trust stores have been subverted in practice: through compromised certification authorities {{DIGINOTAR}}, through intermediate certification authority keys generated so weakly that anyone could recover them {{EMUDHRA}}, and through governments requiring users to install roots of their own {{KAZAKHSTAN}}.
-Transparency logs {{RFC6962}} make misissuance detectable after the fact, but do not prevent it.
-Revocation needs a separate status mechanism, which validators have often been unable to reach or have not checked {{REVOCATION}}.
-
-Anchoring in DNSSEC, and distributing through the DNS, give the architecture the following properties.
-
-**The assertion is the name holder's**:
-: A validated emblem is the statement of whoever holds the domain name, which a validator, or the person it serves, can associate with an organization or brand.
-
-**Subversion is confined**:
-: Only the operators of the issuer's zone and of its parents, and those who can change its registration, can sign for the name or redirect it.
-  This is still trust: a state that operates a top-level domain could forge or suppress emblems beneath it, and DNSSEC has no counterpart to transparency logs.
-  An issuer can weigh this in choosing where its name sits.
-
-**Absence can be proven**:
-: DNSSEC can prove that a name or a record does not exist {{RFC4035}}.
-  A validator can therefore distinguish the absence of an emblem from an answer that was blocked or stripped in transit, and a profile can give absence a meaning ({{domain}}).
-  A proof of absence says nothing about the past, so it does not prevent an issuer from removing an emblem without trace ({{DIEM-REQS}}, Removable).
-
-**Withdrawal is part of publication**:
-: Withdrawing an emblem means removing or replacing its records; copies made earlier stop validating when their signatures expire.
-
-**It works offline**:
-: An emblem carried in a bundle with its chain of signatures can be validated against a trust anchor the validator already holds.
-  The signatures' validity periods bound both how long the bundle is usable and how long a withdrawn emblem can still be accepted this way ({{lifecycle}}).
-
-**Checking can be discreet**:
-: A DNS query goes through a resolver, and reaches the issuer's servers only when the resolver has no cached answer.
-  An issuer that wants to observe queries can defeat caching, so undetectable validation also relies on carried authorizations and bundles ({{roles}}).
-
-Emblems and authorizations are both authenticated with DNSSEC.
-This architecture does not define an alternative root of trust for authorization; see {{DIEM-REQS}}, Authorization.
-If a profile ends up delivering data outside the DNS, that data is bound to the DNS by a digest or key published in a signed record, so that the DNSSEC chain covers it too.
+The authentication of authorizing entities is profile-specific as both authorizing entity selection and the nature of their authorization depends on the specificities of individual use cases.
+Profiles, though, should follow the same rationale when specifying authorizing entity authentication as when specifying issuer authentication (see above).
 
 # Profiles {#profiles}
 
@@ -474,14 +307,14 @@ Protocol documents are needed for:
 
 # Security Considerations
 
-This section follows {{RFC3552}} in outline; {{trust}} describes the trust model on which it depends.
+This section follows {{?RFC3552}} in outline; {{trust}} describes the trust model on which it depends.
 
 **Forgery**:
 : Forging an emblem requires the signing key of the issuer's zone or of one of its parents.
   Validators depend on those parents not to sign falsely for the issuer's name.
 
 **Replay**:
-: A withdrawn emblem can be replayed until its signatures expire ({{lifecycle}}).
+: A withdrawn emblem can be replayed until its signatures expire.
   A proof of absence can likewise be replayed, making a newly published emblem appear absent until the proof's signatures expire.
 
 **Misleading names**:
@@ -505,15 +338,18 @@ This section follows {{RFC3552}} in outline; {{trust}} describes the trust model
 : An attacker can make emblem publishers unreachable.
   The result is indeterminate, not invalid, and bundles remain usable.
 
+**Revocation** :
+: Withdrawal and signature expiry are how authorizations account for the compromise of key material, as {{DIEM-REQS}} requires; a profile chooses lifetimes short enough for its use case.
+
 # Privacy Considerations
 
-This section follows {{RFC6973}} in outline.
+This section follows {{?RFC6973}} in outline.
 
 DNS queries reveal a validator's interest to its resolver, and, for the names they serve, to the issuer's servers and those of authorizing entities.
 A validator limits this by querying through a shared resolver, by obtaining authorizations carried with the emblem, and by validating bundles offline ({{roles}}).
 
 Names can reveal assets.
-An issuer avoids names that describe what they mark, and keeps its zone from being enumerated ({{lifecycle}}), so that a list of protected assets cannot be read from the DNS.
+An issuer avoids names that describe what they mark, and keeps its zone from being enumerated, so that a list of protected assets cannot be read from the DNS.
 
 Emblems can reveal more than their holders intend.
 Values meant for some validators only are protected as described in {{confidentiality}}.
