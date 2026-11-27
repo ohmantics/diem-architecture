@@ -97,7 +97,7 @@ Their digital counterparts must do the same for assets that people and software 
 
 A digital emblem, as this architecture describes it, is a statement about an asset made by the holder of a domain name.
 Where a use case requires it, a separate authorizing entity confirms that the issuer is entitled to make the statement.
-Profiles determine the semantics and contents of these statements, and profile will generally cover one or more use cases.
+Profiles determine the semantics and contents of these statements, and a profile will generally cover one or more use cases.
 Holders publish emblems in the DNS either directly via dedicated resource records or indirectly via a record that points to an emblem service.
 Thus, validators can discover emblems with an ordinary DNS query.
 
@@ -191,7 +191,8 @@ Encodings, record types, and procedures are left to protocol documents.
 ## Emblem Information Model {#info-model}
 
 An emblem is a dictionary of metadata about its subject: a set of entries, each pairing a name with a typed value.
-Profiles define an emblem's semantics and which data may be stored in the emblem ({{profiles}}), e.g., an emblem may cite the law, agreement, or standard on which its assertions rest, and may name a visual mark that a person can be shown alongside the result.
+Profiles define an emblem's semantics and which data may be stored in the emblem ({{profiles}}).
+For example, an emblem may cite the law, agreement, or standard on which its assertions rest, and may name a visual mark that a person can be shown alongside the result.
 All emblems, though, carry:
 
 * a subject and further identifiers (a seal number, a serial number) that a validator can use for the marked asset,
@@ -206,7 +207,7 @@ The architecture will encode emblems in an existing message format that facilita
 Many such message formats exist, e.g., JSON Web Tokens (JWTs) {{?RFC7519}} or CBOR Web Tokens {{?RFC8392}}.
 
 {{DIEM-REQS}} lets a profile require validation of all of an emblem's data or only a defined subset, so that frequently changing data need not be re-signed.
-The information model therefore distinguishes data that must be validated from data may be unvalidated.
+The information model therefore distinguishes data that must be validated from data that may be unvalidated.
 
 ## Discovery and Distribution {#distribution}
 
@@ -229,7 +230,7 @@ Several authorizing entities may authorize one issuer, including entities whose 
 ## Validation {#validation}
 
 Profiles specify how emblems are validated, as particular validation requirements as well as trust anchor choices depend on use case details.
-The architecture allows for two validation mechanism:
+The architecture allows for two validation mechanisms:
 
 - *Direct validation*, via the emblem message format that supports message signing ({{authorization}}), or
 - *transport validation*, via the emblem's transport protocol.
@@ -256,7 +257,7 @@ For example, when relying on DNSSEC {{?RFC9364}} for validation, emblems are sig
 For emblem profiles that use direct validation (see {{validation}}), authentication of issuers requires domain-specific mechanisms.
 The architecture encourages profiles to use message format authentication mechanisms wherever possible, e.g., signed JWTs support authenticating an issuer via X.509 certificates (see {{?RFC7515}}).
 
-The authentication of authorizing entities is profile-specific as both authorizing entity selection and the nature of their authorization depends on the specificities of individual use cases.
+The authentication of authorizing entities is profile-specific as both authorizing entity selection and the nature of their authorization depend on the specificities of individual use cases.
 Profiles, though, should follow the same rationale when specifying authorizing entity authentication as when specifying issuer authentication (see above).
 
 # Profiles {#profiles}
@@ -338,7 +339,7 @@ This section follows {{?RFC3552}} in outline; {{trust}} describes the trust mode
 : An attacker can make emblem publishers unreachable.
   The result is indeterminate, not invalid, and bundles remain usable.
 
-**Revocation** :
+**Revocation**:
 : Withdrawal and signature expiry are how authorizations account for the compromise of key material, as {{DIEM-REQS}} requires; a profile chooses lifetimes short enough for its use case.
 
 # Privacy Considerations
