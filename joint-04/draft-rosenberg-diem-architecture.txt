@@ -105,7 +105,7 @@ Table of Contents
    about an asset made by the holder of a domain name.  Where a use case
    requires it, a separate authorizing entity confirms that the issuer
    is entitled to make the statement.  Profiles determine the semantics
-   and contents of these statements, and profile will generally cover
+   and contents of these statements, and a profile will generally cover
    one or more use cases.  Holders publish emblems in the DNS either
    directly via dedicated resource records or indirectly via a record
    that points to an emblem service.  Thus, validators can discover
@@ -225,10 +225,10 @@ Table of Contents
    An emblem is a dictionary of metadata about its subject: a set of
    entries, each pairing a name with a typed value.  Profiles define an
    emblem's semantics and which data may be stored in the emblem
-   (Section 6), e.g., an emblem may cite the law, agreement, or standard
-   on which its assertions rest, and may name a visual mark that a
-   person can be shown alongside the result.  All emblems, though,
-   carry:
+   (Section 6).  For example, an emblem may cite the law, agreement, or
+   standard on which its assertions rest, and may name a visual mark
+   that a person can be shown alongside the result.  All emblems,
+   though, carry:
 
    *  a subject and further identifiers (a seal number, a serial number)
       that a validator can use for the marked asset,
@@ -254,7 +254,7 @@ Table of Contents
    [DIEM-REQS] lets a profile require validation of all of an emblem's
    data or only a defined subset, so that frequently changing data need
    not be re-signed.  The information model therefore distinguishes data
-   that must be validated from data may be unvalidated.
+   that must be validated from data that may be unvalidated.
 
 4.2.  Discovery and Distribution
 
@@ -290,7 +290,7 @@ Table of Contents
 
    Profiles specify how emblems are validated, as particular validation
    requirements as well as trust anchor choices depend on use case
-   details.  The architecture allows for two validation mechanism:
+   details.  The architecture allows for two validation mechanisms:
 
    *  _Direct validation_, via the emblem message format that supports
       message signing (Section 4.3), or
@@ -338,7 +338,7 @@ Table of Contents
 
    The authentication of authorizing entities is profile-specific as
    both authorizing entity selection and the nature of their
-   authorization depends on the specificities of individual use cases.
+   authorization depend on the specificities of individual use cases.
    Profiles, though, should follow the same rationale when specifying
    authorizing entity authentication as when specifying issuer
    authentication (see above).
@@ -483,10 +483,10 @@ Table of Contents
       unreachable.  The result is indeterminate, not invalid, and
       bundles remain usable.
 
-   *Revocation* :  Withdrawal and signature expiry are how
-      authorizations account for the compromise of key material, as
-      [DIEM-REQS] requires; a profile chooses lifetimes short enough for
-      its use case.
+   *Revocation*:  Withdrawal and signature expiry are how authorizations
+      account for the compromise of key material, as [DIEM-REQS]
+      requires; a profile chooses lifetimes short enough for its use
+      case.
 
 9.  Privacy Considerations
 
